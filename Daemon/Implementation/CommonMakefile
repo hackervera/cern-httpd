@@ -1,0 +1,505 @@
+#	Common Makefile for WWW Servers and some Gateways
+#	-------------------------------------------------
+#
+# A Makefile in a subdirectory for the machine in question contains
+# the necessary definitions of directories etc.
+#
+#	(c) CERN 1990, 1991 -- see Copyright.html for conditions
+#
+#	YOU NEED THE WWW LIBRARY TO USE THIS
+#
+# This file should be invariant between systems.
+#	DEPENDENCIES NOT COMPLETE @@
+#
+#	make		Compile and link the daemon (private version)
+#	make install	Copy it into the system (implies make)
+#	make update	Copy installed version into installed version
+#	make uninstall	Unlink installed version from the system
+#	make clean	Remove intermediate files
+#	make cleanall	Remove intremediate files and products
+#
+#	make httpd	as make
+#	make tigate	Make Techinfo gateway
+#
+#	
+# Macros required to be defined already for make:
+#
+# CC		The C compiler
+# CFLAGS2	Flags for $(CC)
+# LFLAGS	Flags for ld
+# WWW		Root of WWW source tree
+# WTMP		Root of tree in which to put objects e.g. $(WWW) or /tmp
+#
+#______________________________________________________________________
+
+#  If this env var is set to something else Some makes will use that instead
+SHELL = /bin/sh
+#  Rule file to be used by target daemon
+RULE_FILE = "/etc/httpd.conf"
+
+CMN = $(WWW)/Library/Implementation
+INC = $(WWW)/Library/Implementation
+SRC = $(WWW)/Daemon/Implementation
+VMS = $(SRC)/vms
+
+OBJ = .
+OE = $(OBJ)/.created
+
+DOC = \
+    $(WWW)/Paper/www-server-guide.ps, $(WWW)/Paper/www-server-guide.txt
+
+CFLAGS2 =  -I$(INC) -I../Implementation $(CFLAGS) $(SOCKS_FLAGS)
+
+PROD = httpd
+
+USELIBDIR = $(WTMP)/Library/$(WWW_MACH)
+OBJ = $(WTMP)/Daemon/$(WWW_MACH)
+LIBWWW = $(WTMP)/Library/$(WWW_MACH)/libwww.a
+
+OBJS = HTDaemonDIR.o HTRequest.o HTRetrieve.o HTScript.o HTLoad.o \
+	HTCache.o HTCacheInfo.o HTConfig.o HTWild.o \
+	HTSInit.o HTSUtils.o HTims.o \
+	HTPasswd.o HTAuth.o HTLex.o HTGroup.o HTACL.o HTAAProt.o \
+	HTAAServ.o HTAAFile.o HTLog.o HTgc.o HTUserInit.o HTRFC931.o \
+	$(LIBWWW) $(WAISLIB)
+FOBJS = HTDaemonNR.o FINDGate.o  $(LIBWWW)
+TIOBJS = HTDaemonNR.o TechInfoGate.o  $(LIBWWW)
+WOBJS = HTDaemonNR.o WAISGate.o ParseWSRC.o $(LIBWWW)
+TWOBJS = test.o WAISGate.o  $(LIBWWW)
+
+DISTRIBUTION =	$(WWW)/ICE \
+		$(WWW)/BUILD \
+		$(WWW)/BUILD.SH \
+		$(WWW)/Makefile \
+		$(WWW)/README \
+		$(WWW)/README-SOCKS \
+		$(WWW)/server_root
+
+SPECIFIC = $(SRC)/Makefile.decstation	\
+	$(SRC)/Makefile.next
+
+CFILES= $(SRC)/HTDaemon.c \
+	$(SRC)/HTRequest.c	\
+	$(SRC)/HTRetrieve.c	\
+	$(SRC)/HTLoad.c		\
+	$(SRC)/HTims.c		\
+	$(SRC)/HTCache.c	\
+	$(SRC)/HTCacheInfo.c	\
+	$(SRC)/HTgc.c		\
+	$(SRC)/HTConfig.c	\
+	$(SRC)/HTWild.c		\
+	$(SRC)/HTScript.c	\
+	$(SRC)/HTPasswd.c	\
+	$(SRC)/HTAuth.c		\
+	$(SRC)/HTLex.c		\
+	$(SRC)/HTGroup.c	\
+	$(SRC)/HTACL.c		\
+	$(SRC)/HTAAProt.c	\
+	$(SRC)/HTAAServ.c	\
+	$(SRC)/HTAAFile.c	\
+	$(SRC)/HTLog.c		\
+	$(SRC)/HTRFC931.c	\
+	$(SRC)/HTImage.c	\
+	$(SRC)/CGIParse.c	\
+	$(SRC)/cgiutils.c	\
+	$(SRC)/HTUserInit.c	\
+	$(SRC)/HTSInit.c	\
+	$(SRC)/HTSUtils.c	\
+	$(SRC)/HTAdm.c		\
+	$(SRC)/CommonMakefile	\
+	$(SRC)/Version.make
+
+#	$(SRC)/test.c		$(SRC)/Makefile		
+#	$(SRC)/DCLServer.c	$(SRC)/VMServer.c
+#	$(SRC)/VMSHelpGate.c	$(SRC)/TechInfoGate.c
+#	$(SRC)/install.csh	
+
+HFILES =$(SRC)/HTCache.h \
+	$(SRC)/HTDaemon.h \
+	$(SRC)/HTRequest.h \
+	$(SRC)/HTPasswd.h \
+	$(SRC)/HTAuth.h \
+	$(SRC)/HTSUtils.h \
+	$(SRC)/HTLex.h \
+	$(SRC)/HTUserInit.h \
+	$(SRC)/HTGroup.h \
+	$(SRC)/HTACL.h \
+	$(SRC)/HTAAProt.h \
+	$(SRC)/HTAAServ.h \
+	$(SRC)/HTims.h \
+	$(SRC)/HTConfig.h \
+	$(SRC)/HTWild.h \
+	$(SRC)/HTScript.h \
+	$(SRC)/HTPasswd.h \
+	$(SRC)/HTAuth.h \
+	$(SRC)/HTLex.h \
+	$(SRC)/HTGroup.h \
+	$(SRC)/HTACL.h \
+	$(SRC)/HTAAProt.h \
+	$(SRC)/HTAAServ.h \
+	$(SRC)/HTAAFile.h \
+	$(SRC)/HTLog.h \
+	$(SRC)/HTAAFile.h 
+
+SOURCES = $CFILES $HFILES
+
+.SUFFIXES: .h .html
+.html.h:
+#	- chmod +w $*.h
+	www -w90 -na -to text/x-c $*.html > $*.h
+#	chmod -w $*.h
+
+# This is now done by cat in WWW/All/Implementation/Makefile
+# include $(ABS)$(SRC)/Version.make
+
+everything : inc $(PROD) htadm htimage cgiparse cgiutils
+
+
+#		Hypertext File server
+
+PURIFY_CACHE = /home2/frystyk/purify-cache
+
+PURIFY = purify \
+	-logfile=$(HOME)/purify.log
+	-cache-dir=$(PURIFY_CACHE)
+
+#
+#	CERN httpd itself.
+#	ISC 3.0 doesn't have ln -s, that's the reason for the if clause
+#
+$(PROD) : $(OBJS)
+	$(CC) -o $(PROD)_$(VD)  $(OBJS) $(LFLAGS) $(SOCKSLIB) $(MATHLIB)
+	-rm $(PROD)
+	if [ $(WWW_MACH) != isc3.0 ]; then ln -s $(PROD)_$(VD) $(PROD); fi
+
+httpd-lresolv : $(OBJS)
+	$(CC) -o httpd_$(VD)-lresolv  $(OBJS) $(LFLAGS) $(SOCKSLIB) $(MATHLIB) -lresolv
+	-rm httpd-lresolv
+	ln -s $(PROD)_$(VD) httpd-lresolv
+
+purify : $(OBJS)
+	$(PURIFY) $(CC) -o $(PROD)_$(VD) $(OBJS) $(LFLAGS) $(SOCKSLIB) $(MATHLIB)
+	-rm $(PROD)
+	ln -s $(PROD)_$(VD) $(PROD)
+
+HTRequest.o : $(SRC)/HTRequest.c $(INC)/HTUtils.h $(INC)/tcp.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) -DRULE_FILE=\"$(RULE_FILE)\" \
+	 -DVD=\"$(VD)\" $(SRC)/HTRequest.c
+
+HTRetrieve.o : $(SRC)/HTRetrieve.c $(INC)/HTUtils.h $(INC)/tcp.h \
+	 $(INC)/HTFile.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) -DRULE_FILE=\"$(RULE_FILE)\" $(SRC)/HTRetrieve.c
+
+HTLoad.o : $(SRC)/HTLoad.c $(INC)/HTUtils.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTLoad.c
+
+HTCache.o : $(SRC)/HTCache.c $(INC)/HTUtils.h $(SRC)/HTCache.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTCache.c
+
+HTCacheInfo.o : $(SRC)/HTCacheInfo.c $(INC)/HTUtils.h $(SRC)/HTCache.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTCacheInfo.c
+
+HTConfig.o : $(SRC)/HTConfig.c $(INC)/HTUtils.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTConfig.c
+
+HTWild.o : $(SRC)/HTWild.c $(SRC)/HTWild.h $(INC)/HTUtils.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTWild.c
+
+HTScript.o : $(SRC)/HTScript.c $(INC)/HTUtils.h $(INC)/tcp.h \
+	 $(INC)/HTFile.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) -DRULE_FILE=\"$(RULE_FILE)\" \
+	 -DVD=\"$(VD)\" $(SRC)/HTScript.c
+
+HTRFC931.o : $(SRC)/HTRFC931.c \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTRFC931.c
+
+
+#		Access Authorization
+#		(these were originally in libwww by mistake)
+
+HTAAFile.o : $(SRC)/HTAAFile.c $(SRC)/HTAAFile.h \
+	 $(INC)/HTAAUtil.h $(INC)/HTUtils.h $(INC)/HTList.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTAAFile.c
+
+HTPasswd.o : $(SRC)/HTPasswd.c $(SRC)/HTPasswd.h \
+	 $(INC)/HTAAUtil.h $(SRC)/HTAAFile.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTPasswd.c
+
+HTGroup.o : $(SRC)/HTGroup.c $(SRC)/HTGroup.h \
+	 $(INC)/HTAAUtil.h $(SRC)/HTAAFile.h \
+	 $(INC)/HTAssoc.h $(SRC)/HTLex.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTGroup.c
+
+HTACL.o : $(SRC)/HTACL.c $(SRC)/HTACL.h \
+	 $(INC)/HTAAUtil.h $(SRC)/HTAAFile.h $(SRC)/HTGroup.h \
+	 $(INC)/HTAssoc.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTACL.c
+
+HTAuth.o : $(SRC)/HTAuth.c $(SRC)/HTAuth.h \
+	 $(INC)/HTAAUtil.h $(SRC)/HTPasswd.h $(SRC)/HTAAFile.h \
+	 $(INC)/HTAssoc.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTAuth.c
+
+HTAAServ.o : $(SRC)/HTAAServ.c $(SRC)/HTAAServ.h \
+	$(INC)/HTAAUtil.h $(SRC)/HTAAFile.h $(SRC)/HTPasswd.h \
+	 $(SRC)/HTGroup.h $(SRC)/HTACL.h $(SRC)/HTAuth.h \
+	 $(INC)/HTUU.h $(INC)/HTParse.h $(INC)/HTList.h \
+	 $(INC)/HTUtils.h $(INC)/HTString.h $(INC)/HTRules.h \
+	 $(SRC)/HTAAProt.h $(INC)/HTAssoc.h $(SRC)/HTLex.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTAAServ.c
+
+HTAAProt.o : $(SRC)/HTAAProt.c $(SRC)/HTAAProt.h \
+	 $(INC)/HTUtils.h $(INC)/HTAAUtil.h $(SRC)/HTAAFile.h \
+	 $(INC)/HTAssoc.h $(SRC)/HTLex.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTAAProt.c
+
+HTLex.o : $(SRC)/HTLex.c $(SRC)/HTLex.h $(INC)/HTUtils.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTLex.c
+
+HTLog.o : $(SRC)/HTLog.c \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTLog.c
+
+HTims.o : $(SRC)/HTims.c \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTims.c
+
+HTgc.o : $(SRC)/HTgc.c \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) $(SRC)/HTgc.c
+
+inc: $(HFILES)
+	echo "Include files generated from hypertext."
+
+
+#		Administration program
+
+htadm : $(SRC)/HTAdm.c $(INC)/HTUtils.h $(INC)/HTAlert.h \
+	 $(INC)/HTAAUtil.h $(SRC)/HTPasswd.h $(LIBWWW)
+	$(CC) -o htadm $(CFLAGS2) $(SRC)/HTAdm.c HTPasswd.o HTAAFile.o \
+	$(LIBWWW) $(LFLAGS)
+
+#		CGI/1.0 QUERY_STRING environment variable parser
+
+cgiparse : $(SRC)/CGIParse.c $(INC)/HTUtils.h $(LIBWWW)
+	$(CC) -o cgiparse $(CFLAGS2) $(SRC)/CGIParse.c $(LIBWWW) $(LFLAGS)
+
+#		cgiutils
+
+cgiutils : $(SRC)/cgiutils.c $(INC)/HTUtils.h $(SRC)/HTSUtils.h HTSUtils.o \
+	$(LIBWWW)
+	$(CC) -o cgiutils $(CFLAGS2) $(SRC)/cgiutils.c HTSUtils.o \
+	$(LIBWWW) $(LFLAGS)
+
+
+#		ISMAP image handling
+
+htimage : $(SRC)/HTImage.c $(INC)/HTUtils.h $(LIBWWW)
+	$(CC) -o htimage $(CFLAGS2) $(SRC)/HTImage.c $(LIBWWW)
+
+
+$(USELIBDIR)/libwww.a :
+	@echo You must get and make the WWWLibrary product first!
+	(cd $(WWW)/Library/$(WWW_MACH) && make)
+
+
+lib :
+	(cd $(WWW)/Library/$(WWW_MACH) && make)
+
+# Things we check on all platforms and export binaries
+
+all : inc httpd tigate
+	echo "httpd and tigate daemons up to date"
+
+
+# 		FIND gateway - test only (has to run on VM!)
+
+FINDGate : $(FOBJS)
+	$(CC) -o FINDGate $(FOBJS) $(LFLAGS)
+FINDGate.o : $(SRC)/FINDGate.c $(INC)/HTUtils.h $(INC)/tcp.h
+	$(CC) -c $(CFLAGS2) $(SRC)/FINDGate.c
+
+#		Techinfo Gateway
+
+tigate : $(TIOBJS)
+	$(CC) $(LFLAGS) -o tigate $(TIOBJS)
+
+TechInfoGate.o : $(SRC)/TechInfoGate.c
+	$(CC) $(CFLAGS2) -c -o $@ $(SRC)/TechInfoGate.c
+
+# 		WAIS Gateway is just httpd linked with freeWAIS
+#	and a libwww copmpiled with the right flags.
+
+# 		Common Code
+
+test.o : $(SRC)/test.c $(INC)/HTUtils.h $(INC)/tcp.h $(INC)/HTTCP.h
+	$(CC) -c $(CFLAGS2) -DRULE_FILE=\"$(RULE_FILE)\" $(SRC)/test.c
+HTDaemon.o : $(SRC)/HTDaemon.c $(INC)/HTUtils.h $(INC)/tcp.h $(INC)/HTTCP.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	$(CC) -c $(CFLAGS2) -DRULE_FILE=\"$(RULE_FILE)\" \
+	 -DVD=\"$(VD)\" $(SRC)/HTDaemon.c
+#
+#  The following are version of the daemon code with different options.
+#  They have to be made with a copy of the source because the -o
+#  option does not work for object files for the AIX compiler! :-(
+#
+HTDaemonNR.o : $(SRC)/HTDaemon.c $(INC)/HTUtils.h $(INC)/tcp.h $(INC)/HTTCP.h
+	cp $(SRC)/HTDaemon.c $(OBJ)/HTDaemonNR.c
+	$(CC) -c $(CFLAGS2) -DNOCONVERT -DVD=\"$(VD)\"  $(OBJ)/HTDaemonNR.c
+	rm $(OBJ)/HTDaemonNR.c
+HTDaemonDIR.o : $(SRC)/HTDaemon.c $(INC)/HTUtils.h $(INC)/tcp.h \
+	 $(INC)/HTTCP.h \
+	 $(SRC)/HTDaemon.h $(SRC)/HTConfig.h
+	cp $(SRC)/HTDaemon.c HTDaemonDIR.c
+	$(CC) -c $(CFLAGS2) \
+	-DRULE_FILE=\"$(RULE_FILE)\" -DDIR_OPTIONS  -DVD=\"$(VD)\" \
+		HTDaemonDIR.c
+	rm HTDaemonDIR.c
+
+HTSUtils.o : $(SRC)/HTSUtils.c $(SRC)/HTSUtils.h
+	$(CC) -c $(CFLAGS2) -I$(CMN) $(SRC)/HTSUtils.c
+
+HTSInit.o : $(SRC)/HTSInit.c
+	$(CC) -c $(CFLAGS) -I$(CMN) $(SRC)/HTSInit.c
+
+HTUserInit.o : $(SRC)/HTUserInit.c $(SRC)/HTUserInit.h
+	$(CC) -c $(CFLAGS) -I$(CMN) $(SRC)/HTUserInit.c
+
+#_________________________________________________________________________
+#	Install the server
+
+install :	$(PROD)
+	csh $(SRC)/install.csh
+
+#	Link system to the binary and documentation in this tree
+
+link : Works/$(PROD)
+	ln -s `pwd`/$(PROD) $(BINDIR)/$(PROD)
+	- mkdir /usr/local
+	- mkdir /usr/local/lib
+	ln -s $(DEFAULTS) /usr/local/lib/WWW
+
+uninstall :
+	rm $(BINDIR)/$(PROD)
+	rm -r /usr/local/lib/WWW
+
+#	Clean up everything generatable except final products
+#	Including obj directory UNLESS there is anything else in it
+clean :
+	- rm $(OBJ)/.created $(OBJ)/*.o
+	- rmdir $(OBJ)
+
+#	Clean up everything generatable including final products
+
+cleanall : clean
+	- rm $(PROD)
+
+#	Binary release
+#
+#	Must be done on anonymous FTP server!
+#
+#  This makefile does not knw how to make $(PROD)_$(VD) so that trying
+#  to make binay or asis on a weird machine doesn't try to build $(PROD)!
+
+binary : $(PROD)_$(VD)
+	-mkdir /mnt/www0/pub/www/bin/$(WWW_MACH)
+	cp $(PROD)_$(VD) /mnt/www0/pub/www/bin/$(WWW_MACH)/$(PROD)_$(VD)
+
+#	ASIS installation
+#	-----------------
+#	Can only happen on an allocated ASIS development machine and
+#	with uid of the controlling user for the project.
+#
+asis :  /asis/specific/$(ASIS_MACH)/usr.local/bin/$(PROD)
+	touch asis
+	echo ASIS distribution is now up-to-date.
+
+/asis/specific/$(ASIS_MACH)/usr.local/bin/$(PROD) : $(PROD)_$(VD)
+	cp $(PROD)_$(VD) /asis/specific/$(ASIS_MACH)/usr.local/bin/$(PROD)_$(VD)
+	rm -f /asis/specific/$(ASIS_MACH)/usr.local/bin/$(PROD)
+	ln -s $(PROD)_$(VD) \
+		/asis/specific/$(ASIS_MACH)/usr.local/bin/$(PROD)
+
+#	CERNLIB installation
+#	--------------------
+#	Assuming the cernlib-style directory structure
+#	Warning: Not suitable for machine-shared file structure.
+#
+cernlib :	$(PROD)
+	- mkdir $(CERNLIBBIN)
+	cp $(PROD) $(CERNLIBBIN)
+
+
+#_________________________________________________________________________	
+
+
+#	Check directory exists
+$(OE) :
+	-mkdir $(WTMP)
+	-mkdir $(WTMP)/Daemon
+	-mkdir $(WTMP)/Daemon/$(WWW_MACH)
+	touch $(OE)
+
+
+#_________________________________________________________________
+# For W3 Administrative use only:
+
+
+#		W3 Source + documentation release
+#		---------------------------------
+
+distribute : /mnt/www0/pub/www/README.txt \
+	/mnt/www0/pub/www/Copyright.txt $(SOURCES)
+	(cd $(WWW)/.. && WWW=WWW ABS=`pwd`/ make $(MFLAGS) \
+	-f WWW/Daemon/Implementation/Version.make \
+	-f WWW/Daemon/Implementation/CommonMakefile \
+	/mnt/www0/pub/www/src/WWWDaemon_$(VD).tar.Z)
+	(cd ../Implementation; cvs tag \
+	`sed -e 's/VD = /v/' Version.make | sed -e 's?\.?/?'` )
+	@ echo Distribution of Daemon version $(VD) up to date.
+
+# THIS MUST BE BUILT FROM THE DIRECTORY ABOVE WWW ! USE distribute above!
+/mnt/www0/pub/www/src/WWWDaemon_$(VD).tar.Z : $(SOURCES)
+	tar cvf /mnt/www0/pub/www/src/WWWDaemon_$(VD).tar \
+	    $(SOURCES) \
+	    $(WWW)/All \
+	    $(DISTRIBUTION) \
+	    $(DOC) \
+	    $(VMS)/descrip.mms $(VMS)/build_multinet.com \
+	    $(VMS)/setup.com
+	compress -f /mnt/www0/pub/www/src/WWWDaemon_$(VD).tar
+
+#________________________________________________________________________
+#		Hypertext supplied in text format
+#		---------------------------------
+
+$(WWW)/README.txt : $(WWW)/../README.html
+	www -n -p66 http://info.cern.ch/hypertext/README.html \
+		> $(WWW)/README.txt
+/mnt/www0/pub/www/README.txt : $(WWW)/README.txt
+	cp $(WWW)/README.txt /mnt/www0/pub/www/README.txt
+
+$(WWW)/Copyright.txt : $(WWW)/../Copyright.html
+	www -n -p66 http://info.cern.ch/hypertext/Copyright.html \
+		> $(WWW)/Copyright.txt
+/mnt/www0/pub/www/Copyright.txt : $(WWW)/Copyright.txt
+	cp $? $@
+
+

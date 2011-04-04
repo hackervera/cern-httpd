@@ -1,0 +1,196 @@
+<HTML>
+<HEAD>
+<TITLE>HTML to rich text converter for libwww</TITLE>
+<NEXTID N="z5">
+</HEAD>
+<BODY>
+<H1>The HTML to styled text object converter</H1>This interprets the <A
+NAME="z0" HREF="../../MarkUp/MarkUp.html">HTML</A> semantics
+and some HTMLPlus.<P>
+Part of <A
+NAME="z2" HREF="Overview.html">libwww</A> . Implemented by <A
+NAME="z3" HREF="HTML.c">HTML.c</A>
+<PRE>#ifndef HTML_H
+#define HTML_H
+
+#include "HTUtils.h"
+#include "HTFormat.h"
+#include "HTAnchor.h"
+#include "HTMLPDTD.h"
+
+#define DTD HTMLP_dtd
+
+#ifdef SHORT_NAMES
+#define HTMLPresentation 	HTMLPren
+#define HTMLPresent		HTMLPres
+#endif
+
+extern CONST HTStructuredClass HTMLPresentation;
+</PRE>
+
+<H2>HTML_new: A structured stream to parse HTML</H2>
+
+When this routine is called, the request structure may contain a <A
+NAME="z4" HREF="HTAccess.html#z6">childAnchor</A> value.  In that case
+it is the responsability of this module to select the anchor.<P>
+ 
+<PRE>extern HTStructured* HTML_new PARAMS((HTRequest * request,
+					void *   param,
+					HTFormat input_format,
+					HTFormat output_format,
+				     	HTStream * output_stream));
+
+</PRE>
+
+<H3>Reopen</H3>
+
+Reopening an existing HTML object allows it to be retained (for
+example by the styled text object) after the structured stream has
+been closed.  To be actually deleted, the HTML object must be closed
+once more times than it has been reopened.
+
+<PRE>
+extern void HTML_reopen PARAMS((HTStructured * me));
+</PRE>
+
+<H2>Converters</H2>
+
+These are the converters implemented in this module:
+
+<PRE>
+#ifndef pyramid
+extern HTConverter HTMLToPlain, HTMLToC, HTMLPresent, HTMLToTeX;
+#endif
+</PRE>
+
+<H2>Selecting internal character set
+representations</H2>
+<PRE>typedef enum _HTMLCharacterSet {
+	HTML_ISO_LATIN1,
+	HTML_NEXT_CHARS,
+	HTML_PC_CP950
+} HTMLCharacterSet;
+
+extern void HTMLUseCharacterSet PARAMS((HTMLCharacterSet i));
+
+</PRE>
+<H2>Record error message as a hypertext
+object</H2>The error message should be marked
+as an error so that it can be reloaded
+later. This implementation just throws
+up an error message and leaves the
+document unloaded.
+<H3>On entry,</H3>
+<DL>
+<DT>sink
+<DD> is a stream to the output device
+if any
+<DT>number
+<DD> is the HTTP error number
+<DT>message
+<DD> is the human readable message.
+</DL>
+
+<H3>On exit,</H3>a return code like HT_LOADED if object
+exists else &lt; 0
+<PRE>PUBLIC int HTLoadError PARAMS((
+	HTRequest * 	req,
+	int		number,
+	CONST char *	message));
+
+
+</PRE>
+<h2>White Space Treatment</h2>
+There is a small number of different ways of treating white
+space in SGML, in mapping from a text object to HTML.
+These have to be programmed it seems.
+<pre>
+/*
+In text object	\n\n		\n	tab	\n\n\t
+--------------	-------------	-----	-----	-------
+in Address,
+Blockquote,
+Normal,		<P>		<BR>	-		NORMAL
+H1-6:		close+open	<BR>	-		HEADING
+Glossary	<DT>		<DT>	<DD>	<P>	GLOSSARY
+List,				
+Menu		<LI>		<LI>	-	<P>	LIST
+Dir		<LI>		<LI>	<LI>		DIR
+Pre etc		\n\n		\n	\t		PRE
+
+*/
+
+typedef enum _white_space_treatment {
+	WS_NORMAL,
+	WS_HEADING,
+	WS_GLOSSARY,
+	WS_LIST,
+	WS_DIR,
+	WS_PRE
+} white_space_treatment;
+
+</pre>
+<h2>Nesting State</h2>
+These elements form tree with an item for each nesting state: that
+is, each unique combination of nested elements which has a
+specific style.
+<pre>
+typedef struct _HTNesting {
+    void *			style;  /* HTStyle *: Platform dependent */
+    white_space_treatment	wst;
+    struct _HTNesting *		parent;
+    int				element_number;
+    int				item_number;	/* only for ordered lists */
+    int				list_level;	/* how deep nested */
+    HTList *			children;
+    BOOL			paragraph_break;
+    int				magic;
+    BOOL			object_gens_HTML; /* we don't generate HTML */
+} HTNesting;
+
+
+</pre>
+<H2>Nesting functions</H2>
+These functions were new with HTML2.c.  They allow the tree
+of SGML nesting states to be manipulated, and SGML regenerated from the
+style sequence.
+<PRE>
+
+extern void HTRegenInit NOPARAMS;
+
+extern void HTRegenCharacter PARAMS((
+	char			c,
+	HTNesting *		nesting,
+	HTStructured *		target));
+
+extern	void HTNestingChange PARAMS((
+	HTStructured* 	s, 
+	HTNesting*		old, 
+	HTNesting *		new,
+	HTChildAnchor *		info,
+	CONST char *		aName));
+
+extern HTNesting * HTMLCommonality PARAMS((
+	HTNesting * 	s1,
+	HTNesting *	s2));
+
+extern HTNesting * HTNestElement PARAMS((HTNesting * p, int ele));
+extern /* HTStyle * */ void * HTStyleForNesting PARAMS((HTNesting * n));
+
+extern HTNesting* HTMLAncestor PARAMS((HTNesting * old, int depth));
+extern HTNesting* CopyBranch PARAMS((HTNesting * old, HTNesting * new, int depth));
+extern HTNesting * HTInsertLevel PARAMS((HTNesting * old,
+		int	element_number,
+		int	level));
+extern HTNesting * HTDeleteLevel PARAMS((HTNesting * old,
+		int	level));
+extern int HTMLElementNumber PARAMS((HTNesting * s));
+extern int HTMLLevel PARAMS(( HTNesting * s));
+extern HTNesting* HTMLAncestor PARAMS((HTNesting * old, int depth));
+
+#endif		/* end HTML_H */
+
+</PRE>
+
+end</BODY>
+</HTML>

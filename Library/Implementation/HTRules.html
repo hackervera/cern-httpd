@@ -1,0 +1,192 @@
+<HEADER>
+<TITLE>Configuration Manager for libwww</TITLE>
+<!-- Changed by: Henrik Frystyk Nielsen, 29-Jun-1996 -->
+<NEXTID N="6">
+</HEADER>
+<BODY>
+<H1>Configuration manager</H1>Author Tim Berners-Lee/CERN. Public
+domain. Please mail changes to timbl@info.cern.ch.<P>
+The configuration information loaded
+includes tables (file suffixes, presentation
+methods) in other modules.  The most
+likely routines needed by developers
+will be:
+<DL>
+<DT><A
+NAME=z3 HREF="#z2">HTSetConfiguration</A>
+<DD> to load configuration
+information.
+<DT><A
+NAME=z1 HREF="#z0">HTLoadRules</A>
+<DD> to load a whole file
+of configuration information
+<DT><A
+NAME=z5 HREF="#z4">HTTranslate</A>
+<DD> to translate a URL using
+the rule table.
+</DL>
+
+<PRE>#ifndef HTRULE_H
+#define HTRULE_H
+
+#include "HTUtils.h"
+#include "HTAccess.h"	/* HTRequest */
+
+typedef enum _HTRuleOp {
+	HT_Invalid, 
+	HT_Map, 
+	HT_Pass, 
+	HT_Fail,
+	HT_DefProt,
+	HT_Protect,
+	HT_Exec,
+	HT_Redirect,
+	HT_Moved,
+	HT_UseProxy
+} HTRuleOp;
+
+#ifdef SHORT_NAMES
+#define HTSearSc HTSearchScript
+#define HTPutScr HTPutScript
+#define HTPostSc HTPostScript
+#endif /*SHORT_NAMES*/
+
+</PRE>
+
+<H2>Server Side Script Execution</H2>
+
+If a URL starts with <CODE>/htbin/</CODE> it is understood
+to mean a script execution request on server.
+This feature needs to
+be turned on by setting <CODE>HTBinDir</CODE> by the
+<CODE>htbin</CODE> rule.  Index searching is enabled by
+setting <CODE>HTSearchScript</CODE> into the name of script
+in BinDir doing the actual search by <CODE>search</CODE> rule
+(BinDir must also be set in this case, of course).
+<PRE>
+#ifdef NOT_USED
+extern char * HTSearchScript;	/* Search script name */
+extern char * HTPutScript;	/* Script handling PUT */
+extern char * HTPostScript;	/* Script handling POST */
+#endif /* NOT_USED */
+
+</PRE>
+<H2>HTAddRule:  Add rule to the list</H2>
+<H3>On entry,</H3>
+<DL>
+<DT>pattern
+<DD>points to 0-terminated string
+containing a single "*"
+<DT>equiv
+<DD>points to the equivalent string
+with * for the place where the text
+matched by * goes.
+</DL>
+
+<H3>On exit,</H3>
+<DL>
+<DT>returns
+<DD>0 if success, -1 if error.
+</DL>
+Note that if BYTE_ADDRESSING is set,
+the three blocks required are allocated
+and deallocated as one. This will
+save time and storage, when malloc's
+allocation units are large.
+<PRE>extern int HTAddRule PARAMS((HTRuleOp op, const char * pattern, const char * equiv));
+
+
+</PRE>
+<H2>HTClearRules: Clear all rules</H2>
+<H3>On exit,</H3>
+<DL>
+<DT>Rule file
+<DD> There are no rules
+<DT>returns
+<DD>
+<DD> 0 if success, -1 if error.
+</DL>
+
+<PRE>
+#ifdef __STDC__
+extern int HTClearRules(void);
+#else
+extern int HTClearRules();
+#endif
+
+
+</PRE>
+<H2><A
+NAME=z4>HTTranslate: Translate by rules</A></H2>
+<PRE>	
+</PRE>
+<H3>On entry,</H3>
+<DL>
+<DT>required
+<DD> points to a string whose
+equivalent value is neeed
+</DL>
+
+<H3>On exit,</H3>
+<DL>
+<DT>returns
+<DD> the address of the equivalent
+string allocated from the heap which
+the CALLER MUST FREE. If no translation
+occured, then it is a copy of the
+original.
+</DL>
+
+<PRE>
+PUBLIC char * HTTranslate PARAMS((CONST char * required));
+
+</PRE>
+<H2><A
+NAME=z2>HTSetConfiguration:  Load one line
+of configuration information</A></H2>
+<H3>On entry,</H3>
+<DL>
+<DT>config
+<DD> is a string in the syntax
+of a rule file line.
+</DL>
+This routine may be used for loading
+configuration information from sources
+other than the  rule file, for example
+INI files for X resources.
+<PRE>extern int HTSetConfiguration PARAMS((CONST char * config));
+
+
+</PRE>
+<H2><A
+NAME=z0>HtLoadRules:  Load the rules from
+a file</A></H2>
+<H3>On entry,</H3>
+<DL>
+<DT>Rule table
+<DD> Rules can be in any state
+</DL>
+
+<H3>On exit,</H3>
+<DL>
+<DT>Rule table
+<DD> Any existing rules will
+have been kept. Any new rules will
+have been loaded on top, so as to
+be tried first.
+<DT>Returns
+<DD> 0 if no error.
+</DL>
+
+<PRE>
+#ifdef __STDC__
+extern int HTLoadRules(const char * filename);
+#else
+extern int HTLoadRules();
+#endif
+</PRE>
+
+<PRE>
+
+#endif /* HTUtils.h */
+</PRE>end</A></BODY>

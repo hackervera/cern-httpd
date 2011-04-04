@@ -1,0 +1,44 @@
+<HEADER>
+<TITLE>String handling for libwww</TITLE></HEADER>
+<BODY>
+<H1>Strings</H1>Case-independent string comparison
+and allocations with copies etc
+<PRE>
+#ifndef HTSTRING_H
+#define HTSTRING_H
+
+#include "HTUtils.h"
+
+extern CONST char * HTLibraryVersion;	/* String for help screen etc */
+
+</PRE>
+<H2>Case-insensitive string comparison</H2>The usual routines (comp instead
+of cmp) had some problem.
+<PRE>extern int strcasecomp  PARAMS((CONST char *a, CONST char *b));
+extern int strncasecomp PARAMS((CONST char *a, CONST char *b, int n));
+
+</PRE>
+
+<H2>Case-insensitive string inside another string</H2>
+This works like <CODE>strstr()</CODE> but is not case-sensitive.
+<PRE>
+PUBLIC char * strcasestr PARAMS((char *	s1,
+				 char *	s2));
+
+</PRE>
+
+
+<H2>Malloced string manipulation</H2>
+<PRE>#define StrAllocCopy(dest, src) HTSACopy (&amp;(dest), src)
+#define StrAllocCat(dest, src)  HTSACat  (&amp;(dest), src)
+extern char * HTSACopy PARAMS ((char **dest, CONST char *src));
+extern char * HTSACat  PARAMS ((char **dest, CONST char *src));
+
+</PRE>
+<H2>Next word or quoted string</H2>
+<PRE>extern char * HTNextField PARAMS ((char** pstr));
+
+
+#endif
+</PRE>end</A><P>
+</BODY>

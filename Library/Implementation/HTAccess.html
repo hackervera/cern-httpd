@@ -1,0 +1,676 @@
+<HTML>
+<HEAD>
+<TITLE>HTAccess:  Access manager  for libwww</TITLE>
+<NEXTID N="z11">
+</HEAD>
+<BODY>
+<H1>Access Manager</H1>
+This module keeps a list of valid
+protocol (naming scheme) specifiers
+with associated access code.  It
+allows documents to be loaded given
+various combinations of parameters.
+New access protocols may be registered
+at any time.<P>
+
+<B>Note:</B> HTRequest defined and request parameter added to almost all calls
+18 Nov 1993.<P>
+
+This document is a part of the <A NAME="z0" HREF="Overview.html">
+libwww library</A>. The code is implemented in <A NAME="z8" HREF="HTAccess.c">
+HTAcces.c</A>
+
+<PRE>
+#ifndef HTACCESS_H
+#define HTACCESS_H
+#include "HTList.h"
+</PRE>
+
+<B>Short Names</B>
+<PRE>
+#ifdef SHORT_NAMES
+#define HTClientHost 		HTClHost
+#define HTSearchAbsolute	HTSeAbso
+#define HTOutputStream		HTOuStre
+#define HTOutputFormat		HTOuForm
+#endif
+</PRE>
+
+<H2>Flags which may be set to control this module</H2>
+
+<PRE>
+extern char * HTSaveLocallyDir;		/* Dir home for "save locally" files */
+extern char * HTCacheDir;		/* Cache dir, default NULL: no cache */
+extern char * HTClientHost;		/* Name or number of telnetting host */
+extern FILE * HTlogfile;		/* File to output one-liners to */
+extern BOOL HTSecure;			/* Disable security holes? */
+extern char * HTImServer;		/* If I'm cern_httpd */
+extern BOOL HTImProxy;			/* If I'm cern_httpd as a proxy */
+extern BOOL HTForceReload;		/* Force reload from cache or net */
+</PRE>
+
+<H2>Method Management</H2>
+
+Thesse are the valid methods, see <A HREF="http://info.cern.ch/hypertext/WWW/Protocols/HTTP/Methods.html">HTTP Methods</A>
+
+<PRE>
+typedef enum {
+	METHOD_INVALID	= 0,
+	METHOD_GET	= 1,
+	METHOD_HEAD,
+	METHOD_POST,
+	METHOD_PUT,
+	METHOD_DELETE,
+	METHOD_CHECKOUT,
+	METHOD_CHECKIN,
+	METHOD_SHOWMETHOD,
+	METHOD_LINK,
+	METHOD_UNLINK,
+	MAX_METHODS
+} HTMethod;
+</PRE>
+
+<H3>Get Method Enumeration</H3>
+
+Gives the enumeration value of the method as a function of the (char *) name.
+
+<PRE>
+PUBLIC HTMethod HTMethod_enum PARAMS((char * name));
+</PRE>
+
+<H3>Get Method String</H3>
+
+The reverse of <I>HTMethod_enum()</I>
+
+<PRE>
+PUBLIC char * HTMethod_name PARAMS((HTMethod method));
+</PRE>
+
+<H3>Valid Methods</H3>
+
+This functions searches the list of valid methods for a given anchor, see
+<A HREF="HTAnchor.html">HTAnchor module</A> If the method is found it returns
+YES else NO.
+
+<PRE>
+PUBLIC BOOL HTMethod_inList PARAMS((HTMethod	method,
+				    HTList *	list));
+</PRE>
+
+<HR>
+<EM>This section might be move to the Access Authentication Module</EM>
+
+<H4>Match Template Against Filename</H4>
+<PRE>
+/* PUBLIC						HTAA_templateMatch()
+**		STRING COMPARISON FUNCTION FOR FILE NAMES
+**		   WITH ONE WILDCARD * IN THE TEMPLATE
+** NOTE:
+**	This is essentially the same code as in HTRules.c, but it
+**	cannot be used because it is embedded in between other code.
+**	(In fact, HTRules.c should use this routine, but then this
+**	 routine would have to be more sophisticated... why is life
+**	 sometimes so hard...)
+**
+** ON ENTRY:
+**	template	is a template string to match the file name
+**			agaist, may contain a single wildcard
+**			character * which matches zero or more
+**			arbitrary characters.
+**	filename	is the filename (or pathname) to be matched
+**			agaist the template.
+**
+** ON EXIT:
+**	returns		YES, if filename matches the template.
+**			NO, otherwise.
+*/
+PUBLIC BOOL HTAA_templateMatch PARAMS((CONST char * template, 
+				       CONST char * filename));
+</PRE>
+
+<HR>
+
+The following have to be defined
+in advance of the other include files
+because of circular references.
+<PRE>
+typedef struct _HTRequest HTRequest;
+
+/*
+** Callback to call when username and password
+** have been prompted.
+*/
+typedef int (*HTRetryCallbackType) PARAMS((HTRequest * req));
+
+
+#include "HTAnchor.h"
+#include <A
+NAME="z3" HREF="HTFormat.html">"HTFormat.h"</A>
+#include "HTAAUtil.h"		/* HTAAScheme, HTAAFailReason */
+#include "HTAABrow.h"		/* HTAASetup */
+</PRE>
+
+<H2>Default WWW Addresses</H2>
+
+These control the home page selection. To mess with these for normal browses
+is asking for user confusion.
+<PRE>
+#define LOGICAL_DEFAULT "WWW_HOME"	      /* Defined to be the home page */
+
+#ifndef PERSONAL_DEFAULT
+#define PERSONAL_DEFAULT "WWW/default.html"		/* in home directory */
+#endif
+
+#ifndef LOCAL_DEFAULT_FILE
+#define LOCAL_DEFAULT_FILE "/usr/local/lib/WWW/default.html"
+#endif
+
+/* If one telnets to an access point it will look in this file for home page */
+#ifndef REMOTE_POINTER
+#define REMOTE_POINTER  "/etc/www-remote.url"		    /* can't be file */
+#endif
+
+/* and if that fails it will use this. */
+#ifndef REMOTE_ADDRESS
+#define REMOTE_ADDRESS  "http://info.cern.ch/remote.html"   /* can't be file */
+#endif
+
+/* If run from telnet daemon and no -l specified, use this file: */
+#ifndef DEFAULT_LOGFILE
+#define DEFAULT_LOGFILE	"/usr/adm/www-log/www-log"
+#endif
+
+/* If the home page isn't found, use this file: */
+#ifndef LAST_RESORT
+#define LAST_RESORT	"http://info.cern.ch/default.html"
+#endif
+
+/* This is the default cache directory: */
+#ifndef CACHE_HOME_DIR
+#define CACHE_HOME_DIR		"/tmp/"
+#endif
+
+/* The default directory for "save locally" and "save and execute" files: */
+#ifndef SAVE_LOCALLY_HOME_DIR
+#define SAVE_LOCALLY_HOME_DIR	"/tmp/"
+#endif
+</PRE>
+
+<H2><A NAME="HTNetInfo">Protocol Specific Information</A></H2>
+
+This structure contains information about socket number, input buffer for
+reading from the network etc. The structure is used through out the protocol
+modules and is the refenrence point for introducing multi threaded execution
+into the library, see specifications on <A HREF="http://info.cern.ch/hypertext/WWW/Library/User/Multithread/multithread.html">Multiple Threads</A>.
+
+<PRE>
+typedef struct _HTNetInfo {
+    int			sockfd;				/* Socket descriptor */
+    HTInputSocket *	isoc;				     /* Input buffer */
+    int 		addressCount;	     /* Attempts if multi-homed host */
+    BOOL		CRLFdotCRLF;  /* Does the transmission end like this */
+    struct _HTRequest *	request;	   /* Link back to request structure */
+} HTNetInfo;
+</PRE>
+
+<EM><B>Note:</B> The AddressCount varaible is used to count the number
+of attempt to connect to a multi-homed host so we know when to stop
+trying new IP-addresses.</EM>
+
+<H2><A
+NAME="z1">The Request structure</A></H2>When a request is handled, all kinds
+of things about it need to be passed
+along.  These are all put into a
+HTRequest structure. <P>
+
+<B>Note 1:</B> There is also a <A NAME="z4" HREF="HTFormat.html#z17">global list of converters</A> <P>
+<B>Note 2:</B> If you reuse the request structure for more than one
+request then make sure that the request is re-initialized, so that no `old'
+data is reused, see <A HREF="#z100">functions to manipulate HTRequest
+Structure</A>. The library handles its own internal information from request
+to request but the information set by the caller is untouched.
+
+<PRE>struct _HTRequest {
+
+</PRE>The elements of the request structure
+are as follows.
+<H3>Set by the caller of HTaccess:</H3>
+<H4>Conditions of the request itself:</H4>
+<PRE>	HTMethod	method;
+
+</PRE>An atom for the name of the operation
+using HTTP <A
+NAME="z7" HREF="../../Protocols/HTTP/Methods.html">method names</A> .
+<PRE>	HTList * 	conversions ;
+</PRE>NULL, or a list of conversions which
+the format manager can do in order
+to fulfill the request.  This is
+set by the caller of HTAccess. Typically
+points to a list set up an initialisation
+time for example by HTInit.
+<PRE>	HTList *	encodings;	/* allowed content-encodings	  */
+
+</PRE>The list of encodings acceptablein
+the output stream.
+<PRE>	HTList *	languages;	/* accepted content-languages	  */
+
+</PRE>The list of (human) language values
+acceptable in the response
+<PRE>	BOOL (*<A
+NAME="z9"> callback</A> ) PARAMS((
+				struct _HTRequest* request,
+				void *param));
+
+</PRE>A function to be called back in the
+event that a file has been saved
+to disk by HTSaveAndCallBack for
+example.
+<PRE>	void *		context;	/* caller data -- HTAccess unaware */
+
+</PRE>An arbitrary pointer passed to HTAccess
+and passed back as a parameter to
+the <A
+NAME="z10" HREF="#z9">callback</A> .
+<PRE>	HTStream*	output_stream; 
+
+</PRE>NULL in the case of display to the
+user, or if a specific output stream
+is required, the stream.
+<PRE>	HTAtom * 	output_format;
+
+</PRE>The output format required, or a
+generic format such as www/present
+(present to user). 
+<H4>Information about the requester</H4>
+<PRE>	char *		from;
+</PRE>
+
+Email format address of person responible for request, see <A HREF="http://info.cern.ch/hypertext/WWW/Protocols/HTTP/HTRQ_Headers.html#from">From field in
+HTTP Protocol</A>. The default address used is the current location, but that
+can be changed, see <A HREF="HTTCP.html#HTGetHostName">HTTCP module</A>.
+
+<H4>The URI from which this request was obtained</H4>
+<PRE>	HTParentAnchor *parentAnchor;
+</PRE>
+If this parameter is set then a `Referer: &lt;parent address&gt; is generated
+in the request to the server, see <A HREF="http://info.cern.ch/hypertext/WWW/Protocols/HTTP/HTRQ_Headers.html#z14">Referer field in a HTTP Request</A>
+
+<H3>Set by HTAccess</H3>None of the bits below may be looked
+at by a client application except
+in the callback routine, when the
+anchor may be picked out.
+<PRE>	HTParentAnchor*	anchor;
+
+</PRE>The anchor for the object in question.
+Set immediately by HTAcesss.  Used
+by the protocol and parsing modules.
+Valid thoughout the access.
+<PRE>	HTChildAnchor *	childAnchor;	/* For element within the object  */
+
+</PRE>The anchor for the sub object if
+any.  The object builder should ensure
+that htis is selected, highlighted,
+etc when the object is loaded. NOTE:
+Set by HTAccess.
+<PRE>	void *		using_cache;
+
+</PRE>pointer to cache element if cache
+hit
+<H3>Error Diagnostics</H3>
+<PRE>
+	BOOL		error_block;	/* YES if stream has been used	  */
+	HTList *	error_stack;	/* List of errors		  */
+
+</PRE>
+<H3>Library Side</H3>
+<PRE>
+	HTNetInfo *	net_info;	/* Information about socket etc. */
+	int		redirections;	/* Number of redirections */
+</PRE>
+<H3>Server Side</H3>
+<PRE>
+	HTAtom *	content_type;	/* Content-Type:		  */
+	HTAtom *	content_language;/* Language			  */
+	HTAtom *	content_encoding;/* Encoding			  */
+	int		content_length;	/* Content-Length:		  */
+	HTInputSocket *	isoc;		/* InputSocket object for reading */
+	char *		authorization;	/* Authorization: field		  */
+	HTAAScheme	scheme;		/* Authentication scheme used	  */
+</PRE>
+<H3>Client Side</H3>
+<PRE>
+	HTList *	valid_schemes;	/* Valid auth.schemes		  */
+	HTAssocList **	scheme_specifics;/* Scheme-specific parameters	  */
+	char *		prot_template;	/* WWW-Protection-Template: field */
+	HTAASetup *	setup;		/* Doc protection info		  */
+	HTAARealm *	realm;		/* Password realm		  */
+	char *		dialog_msg;	/* Authentication prompt (client) */
+	HTRetryCallbackType
+			retry_callback;	/* Called when password entered	  */
+};
+
+</PRE>
+
+<H2><A NAME="z100">Functions to Manipulate a HTRequest Structure</A></H2>
+
+Just to make things easier especially for clients, here are some functions to
+manipulate the request structure:
+
+<H3>Create blank request</H3>This request has defaults in -- in
+most cases it will need some information
+added before being passed to HTAccess,
+but it will work as is for a simple
+request.
+<PRE>
+PUBLIC HTRequest * HTRequest_new NOPARAMS;
+</PRE>
+
+<H3>Delete request structure</H3>Frees also conversion list hanging
+from req->conversions.
+<PRE>
+PUBLIC void HTRequest_delete PARAMS((HTRequest * req));
+</PRE>
+
+<H3>Clear a request structure</H3>
+Clears a request structure so that it can be reused. The only thing that differs from using free/new is that the list of conversions is kept.
+<PRE>
+extern void HTRequest_clear PARAMS((HTRequest * req));
+</PRE>
+
+<H2>Load a document from relative name</H2>
+<H3>On Entry,</H3>
+<DL>
+<DT>relative_name
+<DD> The relative address
+of the file to be accessed.
+<DT>here
+<DD> The anchor of the object being
+searched
+<DT>request->anchor
+<DD> not filled in yet
+</DL>
+
+<H3>On Exit,</H3>
+<DL>
+<DT>returns    YES
+<DD> Success in opening
+file
+<DT>NO
+<DD> Failure 
+</DL>
+
+<PRE>extern  BOOL HTLoadRelative PARAMS((
+		CONST char * 		relative_name,
+		HTParentAnchor *	here,
+		HTRequest *		request));
+
+
+</PRE>
+<H2>Load a document from absolute name</H2>
+<H3>On Entry,</H3>
+<DL>
+<DT>addr
+<DD> The absolute address of the
+document to be accessed.
+<DT>filter
+<DD> if YES, treat document as
+HTML
+<DT>request->anchor
+<DD> not filled in yet
+</DL>
+
+<PRE>
+</PRE>
+<H3>On Exit,</H3>
+<PRE>
+</PRE>
+<DL>
+<DT>returns YES
+<DD> Success in opening document
+<DT>NO
+<DD> Failure 
+</DL>
+
+<PRE>extern BOOL HTLoadAbsolute PARAMS((CONST char * addr,
+		HTRequest *		request));
+
+
+</PRE>
+<H2>Load a document from absolute name
+to a stream</H2>
+<H3>On Entry,</H3>
+<DL>
+<DT>addr
+<DD> The absolute address of the
+document to be accessed.
+<DT>filter
+<DD> if YES, treat document as
+HTML
+<DT>request->anchor
+<DD> not filled in yet
+</DL>
+
+<H3>On Exit,</H3>
+<DL>
+<DT>returns YES
+<DD> Success in opening document
+<DT>NO
+<DD> Failure 
+</DL>
+Note: This is equivalent to HTLoadDocument
+<PRE>extern BOOL HTLoadToStream PARAMS((
+		CONST char * 		addr,
+		BOOL 			filter,
+		HTRequest *		request));
+
+
+</PRE>
+<H2>Load if necessary, and select an
+anchor</H2>The anchor parameter may be a child
+anchor. The anchor in the request
+is set to the parent anchor. The recursive function keeps the error stack in 
+the request structure so that no information is lost having more than one
+call. 
+<H3>On Entry,</H3>
+<DL>
+<DT>anchor
+<DD> may be a child or parenet
+anchor or 0 in which case there is
+no effect.
+<DT>request->anchor      
+<DD>    Not set
+yet.
+</DL>
+
+<H3>On Exit,</H3>
+<PRE>
+</PRE>
+<DL>
+<DT>returns YES
+<DD> Success
+<DT>returns NO
+<DD> Failure 
+<DT>request->anchor
+<DD> The parenet anchor.
+</DL>
+
+<PRE>
+extern BOOL HTLoadAnchor PARAMS((HTAnchor  * a,
+				 HTRequest *		request));
+extern BOOL HTLoadAnchorRecursive PARAMS((HTAnchor  * a,
+				 	  HTRequest *		request));
+</PRE>
+
+<H2>Load a Document</H2>
+This is an internal routine, which has an address AND a matching
+anchor.  (The public routines are called with one OR the other.)
+This is recursively called from file load module to try ftp (though this
+will be obsolete in the next major release).
+
+<H3>On entry,</H3>
+<DL> 
+<DT> request->
+<DD>
+<DL>
+	<DT> anchor		<DD> a parent anchor with fully qualified
+				     hypertext reference as its address set
+	<DT> output_format	<DD> valid
+	<DT> output_stream	<DD> valid on NULL
+</DL>
+<DT> keep_error_stack 
+<DD> If this is set to YES then the error (or info) stack is not cleared from
+the previous call. 
+</DL> 
+<H3>On exit,</H3>
+returns
+<DL>
+	<DT> <0		<DD> Error has occured.
+	<DT> HT_LOADED	<DD> Success
+	<DT> HT_NO_DATA	<DD> Success, but no document loaded.
+					(telnet sesssion started etc)
+</DL>
+
+<PRE>
+PUBLIC int HTLoad PARAMS((HTRequest * request, BOOL keep_error_stack));
+</PRE>
+
+
+<H2>Bind an anchor to a request structure
+without loading</H2>The anchor parameter may be a child
+anchor. The anchor in the request
+is set to the parent anchor. This
+is useful in non-interactive mode
+if no home-anchor is known. Actually
+the same as HTLoadAnchor(), but without
+loading
+<H3>On Entry,</H3>
+<DL>
+<DT>anchor
+<DD> may be a child or parenet
+anchor or 0 in which case there is
+no effect.
+<DT>request->anchor      
+<DD> Not set yet.
+</DL>
+
+<H3>On Exit,</H3>
+<PRE>
+</PRE>returns YES	 Success<P>
+returns NO	 Failure <P>
+request->anchor	 The parenet anchor.
+<PRE>
+extern BOOL HTBindAnchor PARAMS((HTAnchor *anchor, HTRequest *request));
+
+
+</PRE>
+<H2>Make a stream for Saving object back</H2>
+<H3>On Entry,</H3>
+<DL>
+<DT>request->anchor
+<DD> is valid anchor which
+has previously beeing loaded
+</DL>
+
+<H3>On exit,</H3>
+<DL>
+<DT>returns
+<DD> 0 if error else a stream
+to save the object to.
+</DL>
+
+<PRE>
+
+extern HTStream * HTSaveStream PARAMS((HTRequest * request));
+
+
+</PRE>
+<H2>Search</H2>Performs a search on word given by
+the user. Adds the search words to
+the end of the current address and
+attempts to open the new address.
+<H3>On Entry,</H3>
+<DL>
+<DT>*keywords
+<DD> space-separated keyword
+list or similar search list
+<DT>here
+<DD> The anchor of the object being
+searched
+</DL>
+
+<PRE>extern BOOL HTSearch PARAMS((
+		CONST char *		keywords,
+		HTParentAnchor*		here,
+		HTRequest *		request));
+
+
+</PRE>
+<H2>Search Given Indexname</H2>Performs a keyword search on word
+given by the user. Adds the keyword
+to  the end of the current address
+and attempts to open the new address.
+<H3>On Entry,</H3>
+<DL>
+<DT>*keywords
+<DD> space-separated keyword
+list or similar search list
+<DT>*indexname
+<DD> is name of object search
+is to be done on.
+</DL>
+
+<PRE>extern BOOL HTSearchAbsolute PARAMS((
+	CONST char * 		keywords,
+	CONST char * 		indexname,
+	HTRequest *		request));
+
+
+</PRE>
+<H2>Register an access method</H2>An access method is defined by an
+HTProtocol structure which point
+to the routines for performing the
+various logical operations on an
+object: in HTTP terms,  GET, PUT,
+and POST.<P>
+Each of these routine takes as a
+parameter a <A
+NAME="z2" HREF="#z1">request structure</A> containing
+details ofthe request.  When the
+protocol class routine is called,
+the anchor elemnt in the request
+is already valid (made valid by HTAccess).
+<PRE>typedef struct _HTProtocol {
+	char * name;
+	
+	int (*load)PARAMS((HTRequest *	request));
+		
+	HTStream* (*saveStream)PARAMS((HTRequest *	request));
+
+	HTStream* (*postStream)PARAMS((
+				HTRequest *	request,
+				HTParentAnchor* postTo));
+
+} HTProtocol;
+
+extern BOOL HTRegisterProtocol PARAMS((HTProtocol * protocol));
+
+
+</PRE>
+<H2>Generate the anchor for the home
+page</H2>
+<PRE>
+</PRE>As it involves file access, this
+should only be done once when the
+program first runs. This is a default
+algorithm -- browser don't HAVE to
+use this.
+<PRE>
+extern HTParentAnchor * HTHomeAnchor NOPARAMS;
+</PRE>
+
+<PRE>
+#endif /* HTACCESS_H */
+</PRE>
+end of HTAccess
+</BODY>
+</HTML>

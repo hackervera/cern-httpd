@@ -1,0 +1,23 @@
+#	(c) COPYRIGHT MIT 1995.
+#	Please first read the full copyright statement in the file COPYRIGH.
+#
+#	An error occured in the BUILD script. If you are using this file,
+#	then you have forgotten to include a definition of the machine you 
+#	are working on
+#
+anything :
+	@echo 
+	@echo "The environment variable WWW_MACH could not be set to the"
+	@echo "architecture code for the machine you are working on."
+	@echo "This is normally due to that the BUILD script could not"
+	@echo "figure out your platform." 
+	@echo 
+	@echo "Please read how to modify the BUILD script in the README file"
+	@echo 
+	@echo "If you have problems or want to send back your modifications"
+	@echo "then please contact <libwww@w3.org>."
+	@echo 
+	@echo "Online documentation is available from <URL:http://www.w3.org/>"
+	@echo 
+	exit -1
+

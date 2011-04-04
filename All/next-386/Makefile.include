@@ -1,0 +1,41 @@
+#	Platform-specific Makefile for W3 Library	(NeXT-386)
+#	-----------------------------------------
+#
+
+WWW = ../..
+
+#  Where should temporary (object) files go? Normally, WTMP = $(WWW)
+WTMP = $(WWW)
+
+# For MACH 3.0 it seems -bsd is needed to order to define errno
+# in /usr/include/bsd/sys/errno.h. But __STRICT_BSD__ is needed for
+# errno.
+
+# CFLAGS =  -Wall -g
+CFLAGS =  -Wall -g -arch m68k -arch i386
+
+CC = cc
+#	For testing memory leaks only!   Use /NextDeveloper/MallocDebug app
+# LFLAGS = -lMallocDebug
+LFLAGS =
+
+#WWW_MACH = next
+ASIS_MACH = next/2.0
+
+
+# Directory for installed binary:
+LIBDIR = /usr/local/lib
+
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

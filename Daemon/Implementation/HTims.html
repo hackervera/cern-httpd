@@ -1,0 +1,35 @@
+<HTML>
+<HEAD>
+<TITLE>Stream for If-Modified-Since</TITLE>
+</HEAD>
+<BODY>
+
+<H1>Stream for If-Modified-Since</H1>
+
+<PRE>
+/*
+**	(c) COPYRIGHT MIT 1995.
+**	Please first read the full copyright statement in the file COPYRIGH.
+*/
+</PRE>
+
+Stream for making sure that If-Modified-Since request is handled correctly.
+
+<PRE>
+#ifndef HT_IMS_H
+#define HT_IMS_H
+
+#include "HTUtils.h"
+#include "tcp.h"
+#include "HTStream.h"
+
+PUBLIC HTStream * HTIfModSinceStream PARAMS((time_t	limit,
+					     HTStream *	sink));
+
+#endif /* HT_IMS_H */
+</PRE>
+
+End of declaration module
+
+</BODY>
+</HTML>

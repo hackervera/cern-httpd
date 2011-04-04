@@ -1,0 +1,34 @@
+#	Platform-specific Makefile for W3 Library	(decstation)
+#	-----------------------------------------
+#
+
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+# Build using cc
+CC = cc
+CFLAGS = -g -Ddecstation
+LFLAGS =
+
+# Build using gcc
+# CC = gcc
+# CFLAGS =  -Wall -g -Ddecstation
+# LFLAGS = 
+
+# Directory for installed binary:
+LIBDIR = /usr/local/lib
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

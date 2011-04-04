@@ -1,0 +1,48 @@
+#  Make WWW under unix for Unisys
+#
+
+# For W3 distribution, machine type for subdirectories
+WWW_MACH = unisys
+
+# The ASIS repository's name for the machine we are on
+ASIS_MACH = unisys
+# Not important - changing all the time!
+
+#CFLAGS = -Wall -g -D__svr4__ -DPOSIXWAIT
+CFLAGS = -D__svr4__ -DPOSIXWAIT
+
+#  Ask for static linking so that binary will be transportable
+# LFLAGS = -lresolv -lnsl -lsocket -Bstatic
+LFLAGS = -lresolv -lnsl -lsocket
+CC = cc
+
+# Directory for installed binary:
+# BINDIR = /opt/bin
+BINDIR = /usr/local/bin
+
+#_________________ OK if normal W3 distribution
+# Where is the WWW source root?
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+
+# Where is the W3 object library?
+LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH):/usr/lib
+
+
+
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/client.a $(WAIS)/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

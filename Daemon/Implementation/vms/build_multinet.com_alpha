@@ -1,0 +1,48 @@
+$ WRITE SYS$OUTPUT "Creating WWW Server for "MULTINET" on "ALPHA"." 
+$ WRITE SYS$OUTPUT "=================================================" 
+$ IF "''F$SEARCH("[--.ALPHA.MULTINET]*.*")'" .EQS. "" 	   THEN CREATE/DIR [--.ALPHA.MULTINET]
+$ IF "''F$SEARCH("[--.ETC]*.*")'" .EQS. "" 	   THEN CREATE/DIR [--.ETC]
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTDAEMON.obj [-]HTDaemon.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTREQUEST.obj [-]HTRequest.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTRETRIEVE.obj [-]HTRetrieve.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTSCRIPT.obj [-]HTScript.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTLOAD.obj [-]HTLoad.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTCACHE.obj [-]HTCache.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTCACHEINFO.obj [-]HTCacheInfo.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTCONFIG.obj [-]HTConfig.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTWILD.obj [-]HTWild.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTSINIT.obj [-]HTSInit.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTSUTILS.obj [-]HTSUtils.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTIMS.obj [-]HTims.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTPASSWD.obj [-]HTPasswd.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTAUTH.obj [-]HTAuth.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTLEX.obj [-]HTLex.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTGROUP.obj [-]HTGroup.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTACL.obj [-]HTACL.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTAAPROT.obj [-]HTAAProt.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTAASERV.obj [-]HTAAServ.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTAAFILE.obj [-]HTAAFile.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTLOG.obj [-]HTLog.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTGC.obj [-]HTgc.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTUSERINIT.obj [-]HTUserInit.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTRFC931.obj [-]HTRFC931.c
+$ link /exe=[--.ALPHA.MULTINET]httpd.exe [--.ALPHA.MULTINET]HTDaemon.obj, [--.ALPHA.MULTINET]HTRequest.obj, [--.ALPHA.MULTINET]HTRetrieve.obj, [--.ALPHA.MULTINET]HTScript.obj, [--.ALPHA.MULTINET]HTLoad.obj, 		[--.ALPHA.MULTINET]HTCache.obj, [--.ALPHA.M-
+ULTINET]HTCacheInfo.obj, [--.ALPHA.MULTINET]HTConfig.obj, [--.ALPHA.MULTINET]HTWild.obj, 		[--.ALPHA.MULTINET]HTSInit.obj, [--.ALPHA.MULTINET]HTSUtils.obj, [--.ALPHA.MULTINET]HTims.obj, 		[--.ALPHA.MULTINET]HTPasswd.obj, [--.ALPHA.MULTINET]HTAuth.obj, -
+[--.ALPHA.MULTINET]HTLex.obj, [--.ALPHA.MULTINET]HTGroup.obj, [--.ALPHA.MULTINET]HTACL.obj, [--.ALPHA.MULTINET]HTAAProt.obj, 		[--.ALPHA.MULTINET]HTAAServ.obj, [--.ALPHA.MULTINET]HTAAFile.obj, [--.ALPHA.MULTINET]HTLog.obj, [--.ALPHA.MULTINET]HTgc.obj, -
+[--.ALPHA.MULTINET]HTUserInit.obj, [--.ALPHA.MULTINET]HTRFC931.obj, [---.LIBRARY.ALPHA.MULTINET]wwwlib/lib, [---.LIBRARY.ALPHA.MULTINET]wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTADM.obj [-]HTAdm.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTEXTDUMMY.obj []HTextDummy.c
+$ link /exe=[--.ALPHA.MULTINET]htadm.exe [--.ALPHA.MULTINET]HTAdm.obj, [--.ALPHA.MULTINET]HTPasswd.obj, [--.ALPHA.MULTINET]HTAAFile.obj,                 [--.ALPHA.MULTINET]HTextDummy.obj, [---.LIBRARY.ALPHA.MULTINET]wwwlib/lib, wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]HTIMAGE.obj [-]HTImage.c
+$ link /exe=[--.ALPHA.MULTINET]htimage.exe [--.ALPHA.MULTINET]HTImage.obj,                 [--.ALPHA.MULTINET]HTextDummy.obj, [---.LIBRARY.ALPHA.MULTINET]wwwlib/lib, [---.LIBRARY.ALPHA.MULTINET]wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]CGIPARSE.obj [-]CGIParse.c
+$ link /exe=[--.ALPHA.MULTINET]cgiparse.exe [--.ALPHA.MULTINET]CGIParse.obj,                 [--.ALPHA.MULTINET]HTextDummy.obj, [---.LIBRARY.ALPHA.MULTINET]wwwlib/lib, [---.LIBRARY.ALPHA.MULTINET]wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",MULTINET)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ANSI/obj=[--.ALPHA.MULTINET]CGIUTILS.obj [-]cgiutils.c
+$ link /exe=[--.ALPHA.MULTINET]cgiutils.exe [--.ALPHA.MULTINET]cgiutils.obj, [--.ALPHA.MULTINET]HTSUtils.obj,                 [--.ALPHA.MULTINET]HTextDummy.obj, [---.LIBRARY.ALPHA.MULTINET]wwwlib/lib, [---.LIBRARY.ALPHA.MULTINET]wwwlib.opt/opt
+$ continue
+$ copy []setup.com [--.ALPHA.MULTINET]setup.com
+$ continue

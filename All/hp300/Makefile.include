@@ -1,0 +1,44 @@
+#  Make WWW under unix for HP 300 or 400 using cc
+#
+
+# Options for cc
+# CC = cc
+# CFLAGS = -g
+# CFLAGS = -Aa -g -D_HPUX_SOURCE -Dunix
+
+# Options for gcc
+CC = gcc
+CFLAGS = -g
+
+# Link with BSD library for getwd()
+LFLAGS = -lBSD
+
+# Directory for installed binary:
+BINDIR = /usr/local/bin
+
+
+#_________________ OK if normal W3 distribution
+# Where is the WWW source root?
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+
+# Where is the W3 object library?
+LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH)
+
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS-0.3
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/ir
+# WAISCFLAGS = -DDIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+
+ 

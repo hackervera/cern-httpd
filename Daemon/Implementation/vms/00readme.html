@@ -1,0 +1,41 @@
+<HEADER><TITLE>Read Me for [.DAEMON.ETC]</TITLE><HEADER>
+
+<BODY>
+See the <A HREF="http://info.cern.ch/hypertext/WWW/Daemon/Status.html"
+>CERN server documentation</A> for detailed descriptions of the
+<b>v2.16 httpd</b> and explanations of how to use it.
+<p>
+
+To build the server, execute DESCRIP.MMS, BUILD_MULTINET.COM or
+BUILD_UCX.COM in [.LIBRARY.IMPLEMENTATION.VMS] to create the common
+object library (<b>WWWLib.olb</b>), then execute the corresponding file
+in [.DAEMON.IMPLEMENTATION.VMS] to build the server (<b>HTTPD.exe</b>),
+clickable image support (<b>HTImage.exe</b>), and authorization file
+utility (<b>HTAdm.exe</b>).  If you do not yet have a <A
+HREF="http://info.cern.ch/hypertext/WWW/Clients.html">W3 client</A>,
+you can build the simple Line Mode Client (<b>WWW.exe</b>) with the MMS
+or appropriate command file in [.LINEMODE.IMPLEMENTATION.VMS] to check
+out the server.
+<p>
+
+Start by testing the server as a detached process on port 8001
+with TRACE implemented, after reading all the headers and comments
+in the foo_HTTP8001.COM files, HTTP8001.CONF, and SPAWNINIT.COM.
+<p>
+
+Read the headers and comments of the other foo.COM and foo.PP files for
+information on what they do and how to use them.
+<p>
+
+If the server checks out OK on port 8001, install it on port 80,
+either:
+<p>
+<ol>
+<li>as a detached process by using SUBMIT_HTTP80.COM,<br>
+or
+<li>under Inetd (MultNet's MULTINET_SERVER or UCX's AUX) with a
+system logical (HTTPD_CONFIG80) pointing to HTTP80.CONF, and after
+INSTALLing the image /SHAR/OPEN/HEAD to speed up initiation of
+multiple Inetd processes.
+</ol>
+</BODY>

@@ -1,0 +1,45 @@
+#  Make WWW under ultrix with gcc
+#
+
+
+# For W3 distribution, machine type for subdirectories
+WWW_MACH = vax_ultrix
+
+# For ASIS installation, the ASIS code for the machine/os
+ASIS_MACH = none
+
+CC = gcc
+CFLAGS = -g  -DDEBUG -Wall
+LFLAGS = -g
+
+#	This is bug fix for out-of-date ultrix on cernvax
+# LFLAGS = -g pfcode.o -lresolv
+
+# Directory for installed binary:
+BINDIR = /usr/local/unix
+
+
+#_________________ OK if normal W3 distribution
+# Where is the WWW source root?
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+
+# Where is the W3 object library?
+LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH)
+
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

@@ -1,0 +1,56 @@
+
+This is a small upgrade release of the CERN server (a.k.a. W3C
+httpd). It includes a set of bug fixes and some improvements. The
+release comes ASIS - that is - there is _no_ support available. Take
+it or leave it :-)
+
+The release does only include source code, you must compile the binary
+yourself.
+
+THIS PACKAGE INCLUDES:
+  * source code under the WWW directory [where this README file is]
+    To compile just type
+
+		make
+
+    and binaries will appear in Daemon/xxx where xxx is your host's
+    architecture, like sun4 or next.
+
+  * README-SOCKS explaining how to compile and use SOCKSified httpd
+  * server_root/ directory containing:
+     * Sample configuration files for httpd in config/
+	- httpd.conf for normal use as HTTP server
+	- prot.conf for normal use as HTTP server with access control
+	- proxy.conf for proxy use without caching
+	- caching.conf for proxy use with caching
+	- all.conf that contains all the configuration directives
+	  understood by httpd
+
+     * Sample icons in icons/
+	- to be used for directory listings, and also for ftp listings
+	  when using httpd as a proxy
+	- simplist way to make use of the icons is to define the
+	  server root directory to be server_root under this current
+	  directory [where this README file sits], by specifying in
+	  the configuration file:
+
+		ServerRoot  /what/ever/server_root
+
+
+ONLINE DOCUMENTATION for this software is in:
+
+	http://www.w3.org/pub/WWW/Daemon/
+
+Security bugs can be sent to
+
+	httpd@w3.org
+
+Remember to run httpd in VERBOSE MODE [with the -v or -vv command line
+option] when things seem to be going wrong and attach the output to
+your mail message.  This will make our job a lot easier.
+
+If httpd crashes and a core image is generated, run "dbx /path/httpd"
+and say "where" to see where the execution was when the program
+crashed.
+
+Have fun!

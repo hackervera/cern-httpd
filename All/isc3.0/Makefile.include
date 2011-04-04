@@ -1,0 +1,39 @@
+#  Make WWW under isc3.0 for Interactive/Sunsoft 3.0 Unix (SysVr3.2)
+#   Use this as a template
+
+# For W3 distribution, machine type for subdirectories
+WWW_MACH = isc3.0
+
+CC = gcc
+
+CFLAGS = -DISC3 -D_SYSV3 -D_POSIX_SOURCE -DPOSIX_JC
+# CFLAGS = -O -DISC3
+
+LFLAGS = -linet -lcposix 
+# LFLAGS = -linet -lcposix -s
+
+# Directory for installed binary:
+BINDIR = /etc/httpd
+
+# Where is the W3 object library to be installed (not normally done)?
+LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH)
+
+#_________________ OK if normal W3 distribution
+# Where is the WWW source root?
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

@@ -1,0 +1,41 @@
+#  Make WWW under unix for NCR 3000
+#
+
+# For W3 distribution, machine type for subdirectories
+WWW_MACH = ncr
+
+# The ASIS repository's name for the machine we are on
+ASIS_MACH = ncr
+# Not important - changing all the time!
+
+CFLAGS = -D__svr4__ -DPOSIXWAIT -Hnocopyr
+
+LFLAGS = -lnsl -lsocket -lresolv
+CC = cc
+
+# Directory for installed binary:
+# BINDIR = /opt/bin
+BINDIR = /local/cern-httpd
+
+#_________________ OK if normal W3 distribution
+# Where is the WWW source root?
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+# Where is the W3 object library?
+LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH):/usr/lib
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/$(WWW_MACH)/client.a $(WAIS)/$(WWW_MACH)/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

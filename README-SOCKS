@@ -1,0 +1,147 @@
+
+SOCKS access for MS-Windows Mosaic
+----------------------------------
+
+The CERN httpd can now provide SOCKS access for standard MS-Windows
+Mosaic 2.0alpha2 clients.  This is probably the only README file you
+need to read. 
+
+
+BACKGROUND
+----------
+
+Some recent changes to the CERN WWW library code allow redirection of
+requests from WWW clients. 
+
+In summary, this mechanism allows clients compliant with the CERN
+library to be pointed at an httpd daemon, which will satisfy WWW
+requests on their behalf.  Win-Mosaic 2.0alpha2 is such a client. 
+
+Thus, this can be used to provide proxied Internet access to Win-Mosaic
+clients that cannot themselves connect directly to Internet resources,
+because they are inside an Internet `Firewall'. 
+
+This can be got working in two ways:
+
+ 1. You may run a proxying daemon (such as CERN's httpd 2.17beta) on
+    a system which does have direct Internet access -- such as  your
+    Internet  Firewall  bastion  system  itself  --  and  point your
+    Win-Mosaic clients at this.  The disadvantage of  this  is  that
+    you  have to run another, large piece of software (the httpd) on
+    your bastion; I was not happy to do this. 
+
+or
+
+ 2. You  may  build  a  SOCKS-compliant version of this proxy httpd,
+    which can then run on an _internal_ host, and can  still  access
+    Internet resources on behalf of its Win-Mosaic clients, thus:
+
+        Win Mosaic -> SOCKSified httpd -> sockd -> Internet
+                                       or
+                                       -> direct -> local 
+
+    The  advantage  of  this  to SOCKS users is that Internet access
+    remains governed by the  configuration  of  the  sockd  on  your
+    Firewall  bastion.   
+
+    (Note  that this is a scheme already pioneered by Dick St Peters
+    <stpeters@spare-parts.crd.ge.com> for use with Mac-Mosaic, using
+    an  earlier  version of WWW redirection mechanism.  However, the
+    new WWW  Library  mechanism  makes  implementation  considerably
+    simpler.)
+                    
+
+THE SOCKSIZED HTTPD
+-------------------
+
+The SOCKSification of the CERN httpd is relatively simple with SOCKS
+version 2.2.  Just a question of SOCKSizing only the WWW library calls
+and not those that the daemon uses for local Win-Mosaic client
+connections!  (see later)
+
+The distribution of the CERN httpd (2.17beta) has all the required
+changes made to it for SOCKS.  After unpacking the distribution:
+
+ 1. cd ./WWW
+    
+ 2. Edit  the  file  `BUILD', to set values for the two variables at
+    the top:
+
+        SOCKSLIB        set this to point to the location of
+                        your ready-built SOCKS library; this
+                        must be Version 4.2 (or later) built
+                        with the -DSHORTENED_RBIND option.
+
+        SOCKS_FLAGS     set this to "-DSOCKS" to enable the
+                        SOCKS code
+
+ 3. Type `./BUILD'    
+
+
+    Everything  should  now  build  for  you.  To use your SOCKSized
+    httpd  you   also   need   a   configuration   file,   typically
+    /etc/httpd.conf.   A simple yet adequate version of this file is
+    this:
+            
+        pass http:*
+        pass ftp:*
+        pass wais:*
+        pass gopher:*
+        fail news:*
+        fail *
+
+
+       (An aside to explain this file, if you care:
+
+        The  `pass'  lines  allow access to remote resources of each
+        specified type.  The `fail' line at the end blocks access to
+        any  local  resources  (ie, on the system where the httpd is
+        running). 
+                
+        For   more   details   on  the  syntax  available  in  httpd
+        configuration files, including the the very  useful  use  of
+        CACHES,  and  for  how to control which local client systems
+        nay use your proxy, see the URL:
+                                
+            http://info.cern.ch/hypertext/WWW/Daemon/User/Guide.html
+
+
+ 4. You can now start your proxy server.  To run it, listenin on port
+    80, and logging to a logfile, as root use a command like:
+    
+            httpd -p 80 -l logfile
+
+    There's  also a -v command for verbose output of what its doing,
+    if you hit problems and want to try to work out why. 
+
+
+ 5. Next you must configure your SOCKS server sockd to allow connections
+    outwards from the httpd daemon.
+
+    By  default,  the  daemon will change uid to `nobody' and gid to
+    `nogroup' when retrieving a request (though you can  change  the
+    values using the configuration options `UserId' and `GroupId' in
+    your /etc/httpd.conf file).  Thus, this is the  `user'  who  the
+    SOCKS  request  will  appear  to have come from.  Make sure that
+    your sockd allows it.
+        
+
+ 7. Now you must point your Win-Mosaic clients at this proxy.  
+    Remember that you MUST have Win-Mosaic 2.0alpha2.  To define your 
+    proxy server, edit lines of this form in your MOSAIC.INI file:
+
+      [proxy information]
+      http_proxy=http://proxyhost.your.dom:80/
+      ftp_proxy=http://proxyhost.your.dom:80/
+      wais_proxy=http://proxyhost.your.dom:80/
+      gopher_proxy=http://proxyhost.your.dom:80/
+
+
+Let me know if you hit any problems!
+
+
+                        I.      (14-March-94)
+
+
+Ian Dunkin <imd1707@ggr.co.uk>. 
+

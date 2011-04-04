@@ -1,0 +1,90 @@
+<HEADER>
+<TITLE>/Net/dxcern/userd/timbl/hypertext/WWW/Library/Implementation/HTBTree.html</TITLE>
+<NEXTID N="1">
+</HEADER>
+<BODY>
+<H1>Balanced Binary Tree for sorting
+things</H1>Tree creation, traversal and freeing.
+ User-supplied comparison routine.<P>
+Author: Arthur Secret, CERN. Public
+domain.  Please mail bugs and changes
+to www-request@info.cern.ch<P>
+part of <A
+NAME=z0 HREF="Overview.html">libWWW</A>
+<PRE>#ifdef SHORT_NAMES
+#define	HTBTree_new		HTBTNew
+#define	HTBTree_free		HTBTFree
+#define HTBTreeAndObject_free	HTBTAOFr
+#define HTBTree_add		HTBTAdd
+#define	HTBTree_next		HTBTNext
+/* #define	HTBTree_object		HTBTObje already a macro */
+#endif
+
+
+</PRE>
+<H2>Data structures</H2>
+<PRE>typedef struct _HTBTree_element {
+    void			*object;	/* User object */
+    struct _HTBTree_element	*up;
+    struct _HTBTree_element	*left;
+    int				left_depth;
+    struct _HTBTree_element	*right;
+    int				right_depth;
+} HTBTElement;
+
+typedef int (*HTComparer) PARAMS((void * a, void * b));
+
+typedef struct _HTBTree_top {
+    HTComparer			compare;
+    struct _HTBTree_element	*top;   
+} HTBTree;
+
+
+</PRE>
+<H2>Create a binary tree given its discrimination
+routine</H2>
+<PRE>extern HTBTree * HTBTree_new PARAMS((HTComparer comp));
+
+
+
+</PRE>
+<H2>Free storage of the tree but not
+of the objects</H2>
+<PRE>extern void HTBTree_free PARAMS((HTBTree* tree));
+
+
+
+</PRE>
+<H2>Free storage of the tree and of the
+objects</H2>
+<PRE>extern void HTBTreeAndObject_free PARAMS((HTBTree* tree));
+
+
+
+</PRE>
+<H2>Add an object to a binary tree</H2>
+<PRE>
+extern void HTBTree_add PARAMS((HTBTree* tree, void * object));
+
+
+</PRE>
+<H2>Find user object for element</H2>
+<PRE>#define HTBTree_object(element)  ((element)->object)
+
+
+</PRE>
+<H2>Find next element in depth-first
+order</H2>
+<H3>On entry,</H3>
+<DL>
+<DT>ele
+<DD>if NULL, start with leftmost element.
+if != 0 give next object to the right.
+<DT>returns
+<DD>Pointer to element ot NULL
+if none left.
+</DL>
+
+<PRE>extern HTBTElement * HTBTree_next PARAMS((HTBTree* tree, HTBTElement * ele));
+
+</PRE>end</BODY>

@@ -1,0 +1,197 @@
+<HTML>
+<HEAD>
+<TITLE>File access in libwww</TITLE>
+<NEXTID N="z4">
+</HEAD>
+<BODY>
+<H1>File Access</H1>These are routines for local file
+access used by WWW browsers and servers.
+Implemented by <A HREF="HTFile.c">HTFile.c</A>. This module is a part of the
+<A HREF="Overview.html">CERN Common WWW Library</A>.<P>
+
+If the file is not a local file,
+then we pass it on to <A
+NAME="z3" HREF="HTFTP.html">HTFTP</A> in case
+it can be reached by FTP. However, as this is very time consuming when
+requesting a local file that actually doesn't exist, this redirection will
+be disabled in the next major release, <EM>www-bug@info.cern.ch</EM>
+June 1994.<P>
+
+<B>Note:</B> All functions that deal with directory listings etc. have been
+moved to <A HREF="HTDirBrw.html">HTDirBrw Module</A>.
+
+
+
+<PRE>
+#ifndef HTFILE_H
+#define HTFILE_H
+
+#include "HTFormat.h"
+#include "HTAccess.h"
+#include "HTML.h"		/* SCW */
+#include "HTDirBrw.h"
+
+#ifdef SHORT_NAMES
+#define HTGetCoD	HTGetContentDescription
+#define HTSplFiN	HTSplitFilename
+#endif /*SHORT_NAMES*/
+</PRE>
+<H2>Multiformat Handling</H2>
+
+<H3>Split Filename to suffixes</H3>
+<PRE>
+PUBLIC int HTSplitFilename PARAMS((char *	s_str,
+				   char **	s_arr));
+
+</PRE>
+
+<H3>Get Content Description According to Suffixes</H3>
+<PRE>
+PUBLIC HTContentDescription * HTGetContentDescription PARAMS((char ** actual,
+							      int	  n));
+
+#define MULTI_SUFFIX ".multi"   /* Extension for scanning formats */
+#define MAX_SUFF 15		/* Maximum number of suffixes for a file */
+
+</PRE>
+
+<H2>Convert filenames between local and WWW formats</H2>
+<PRE>extern char * HTLocalName PARAMS((CONST char * name));
+
+
+</PRE>
+<H2>Make a WWW name from a full local
+path name</H2>
+<PRE>extern char * WWW_nameOfFile PARAMS((const char * name));
+
+
+</PRE>
+<H2>Generate the name of a cache file</H2>
+<PRE>extern char * HTCacheFileName PARAMS((CONST char * name));
+</PRE>
+
+<H2><A
+NAME="z1">HTSetSuffix: Define the representation
+for a file suffix</A></H2>This defines a mapping between local
+file suffixes and file content types
+and encodings.
+<H3>On entry,</H3>
+<DL>
+<DT>suffix
+<DD> includes the "." if that is
+important (normally, yes!)
+<DT>representation
+<DD> is MIME-style content-type
+<DT>encoding
+<DD> is MIME-style <A
+NAME="z0" HREF="../../Protocols/rfc1341/5_Content-Transfer-Encoding.html#z0">content-transfer-encoding</A>
+(8bit, 7bit, etc)
+<DT>language
+<DD>is MIME-style content-language
+<DT>quality
+<DD> an a priori judgement of
+the quality of such files (0.0..1.0)
+</DL>
+
+<PRE>
+/*
+** Example:  HTSetSuffix(".ps", "application/postscript", "8bit", NULL, 1.0);
+*/
+
+PUBLIC void HTSetSuffix PARAMS((CONST char *	suffix,
+			       CONST char *	representation,
+			       CONST char *	encoding,
+			       CONST char *	language,
+			       float		quality));
+
+PUBLIC void HTAddType PARAMS((CONST char *	suffix,
+			      CONST char *	representation,
+			      CONST char *	encoding,
+			      float		quality));
+
+PUBLIC void HTAddEncoding PARAMS((CONST char *	suffix,
+				  CONST char *	encoding,
+				  float		quality));
+
+PUBLIC void HTAddLanguage PARAMS((CONST char *	suffix,
+				  CONST char *	language,
+				  float		quality));
+
+
+</PRE>
+<H2>HTFileFormat: Get Representation
+and Encoding from file name</H2>
+<H3>On exit,</H3>
+<DL>
+<DT>return
+<DD> The represntation it imagines
+the file is in
+<DT>*pEncoding
+<DD> The encoding (binary,
+7bit, etc). See <A
+NAME="z2" HREF="#z1">HTSetSuffix</A> .
+<DT>*pLanguage
+<DD> The language.
+</DL>
+
+<PRE>extern HTFormat HTFileFormat PARAMS((
+		CONST char * 	filename,
+		HTAtom ** 	pEncoding,
+		HTAtom **	pLanguage));
+
+
+</PRE>
+<H2>Determine file value from file name</H2>
+<PRE>
+
+extern float HTFileValue PARAMS((
+		CONST char * filename));
+
+
+</PRE>
+<H2>Determine write access to a file</H2>
+<H3>On exit,</H3>
+<DL>
+<DT>return value
+<DD> YES if file can be accessed
+and can be written to.
+</DL>
+
+<PRE>
+</PRE>
+<H3>Bugs</H3>Isn't there a quicker way?
+<PRE>
+
+extern BOOL HTEditable PARAMS((CONST char * filename));
+
+
+</PRE>
+<H2>Determine a suitable suffix, given
+the representation</H2>
+<H3>On entry,</H3>
+<DL>
+<DT>rep
+<DD> is the atomized MIME style representation
+</DL>
+
+<H3>On exit,</H3>
+<DL>
+<DT>returns
+<DD> a pointer to a suitable suffix
+string if one has been found, else
+NULL.
+</DL>
+
+<PRE>extern CONST char * HTFileSuffix PARAMS((
+		HTAtom* rep)); 
+
+
+
+</PRE>
+<H2>The Protocols</H2>
+<PRE>GLOBALREF HTProtocol HTFTP, HTFile;
+
+#endif /* HTFILE_H */
+
+</PRE>end of HTFile</A></BODY>
+</HTML>

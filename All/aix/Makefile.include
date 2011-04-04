@@ -1,0 +1,43 @@
+#  Make WWW under unix for rs6000 with no gcc
+#
+
+# For W3 distribution, machine type for subdirectories
+WWW_MACH = rs6000
+
+# For ASIS
+ASIS_MACH = ibm-rs6000/aix-3.2
+
+# Directory for installed binary:
+BINDIR = /usr/local/bin
+
+# The AIX compiler does not define unix... AIX will do it and avoid realloc bug
+
+CC = cc
+CFLAGS =  -g  -DDEBUG -D_BSD -D_BSD_INCLUDES
+LFLAGS =
+
+#_________________ OK if normal W3 distribution
+# Where is the WWW source root?
+WWW = ../..
+
+#  Where should temporary (object) files go?
+# It MUST go in the source tree for rs6000, as cc doesn't have a working
+# -o option!   (what a crock..)
+WTMP = $(WWW)
+
+# Where is the W3 object library?
+LIBDIR = /usr/local/lib
+
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

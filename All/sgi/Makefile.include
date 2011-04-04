@@ -1,0 +1,52 @@
+#  Make WWW for Silicon Graphics
+#
+# For W3 distribution, machine type for subdirectories
+WWW_MACH = sgi
+
+# Architecutre in ASIS scheme
+ASIS_MACH = sgi/iris-3.5
+
+#
+#  -signed
+#	Cause all char declarations to be signed char declarations,
+#	the default is to treat them as unsigned char declarations.
+#
+#  This fixes some problems in directory browsing doing infinite
+#  looping on read.
+#
+
+#  The extra define using BSD-SIGNALS is proposed by Andrew Williams,
+#  <andrew@irc.umbc.edu>
+CC = cc
+# CFLAGS = -DDEBUG -signed
+CFLAGS = -DDEBUG -signed -D_BSD_SIGNALS
+
+LFLAGS = -lsun
+
+# Directory for installed binary:
+BINDIR = /usr/local/bin
+
+#_________________ OK if normal W3 distribution
+# Where is the WWW source root?
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+
+# Where is the W3 object library?
+LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH)
+
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

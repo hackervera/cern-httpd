@@ -1,0 +1,841 @@
+<HTML>
+<HEAD>
+<TITLE>System dependencies in the W3 library</TITLE>
+<NEXTID N="z5">
+</HEAD>
+<BODY>
+<H1>System Dependencies</H1>System-system differences for TCP
+include files and macros. This file
+includes for each system the files
+necessary for network and file I/O.
+ Part of <A NAME="z4" HREF="Overview.html">libwww</A>.
+
+<H3>Authors</H3>
+<DL>
+<DT>TBL
+<DD> Tim Berners-Lee, W3 project, CERN, &lt;timbl@info.cern.ch&gt;
+<DT>EvA
+<DD> Eelco van Asperen &lt;evas@cs.few.eur.nl&gt;
+<DT>MA
+<DD> Marc Andreesen NCSA
+<DT>MD
+<DD> Mark Donszelmann &lt;duns@vxcern.cern.ch&gt;
+<DT>AT
+<DD> Aleksandar Totic &lt;atotic@ncsa.uiuc.edu&gt;
+<DT>SCW
+<DD> Susan C. Weber &lt;sweber@kyle.eitech.com&gt;
+<DT>HF
+<DD> Henrik Frystyk, &lt;frystyk@dxcern.cern.ch&gt;
+</DL>
+
+<H3>History:</H3>
+<DL>
+<DT>22 Feb 91
+<DD> Written (TBL) as part of
+the WWW library.
+<DT>16 Jan 92
+<DD> PC code from (EvA)
+<DT>22 Apr 93
+<DD> Merged diffs bits from
+xmosaic release
+<DT>29 Apr 93
+<DD> Windows/NT code from (SCW)
+<DT>29 Sep 93
+<DD> VMS fixes (MD)
+</DL>
+
+<PRE>
+#ifndef TCP_H
+#define TCP_H
+</PRE>
+
+<H2>Default values</H2>These values may be reset and altered by
+system-specific sections later on. There is also a bunch of
+<A NAME="z5" HREF="#z2">defaults</A> at the end and a section for
+<A NAME="z11" HREF="#z10">ordinary BSD unix versions</A>.
+
+<PRE>/* Default values of those: */
+#define NETCLOSE close	    /* Routine to close a TCP-IP socket		*/
+#define NETREAD  read	    /* Routine to read from a TCP-IP socket	*/
+#define NETWRITE write	    /* Routine to write to a TCP-IP socket	*/
+
+/* Unless stated otherwise, */
+#define SELECT			/* Can handle &gt;1 channel.		*/
+#define GOT_SYSTEM		/* Can call shell with string		*/
+
+#ifdef unix
+#define GOT_PIPE
+#endif
+#ifdef VM
+#define GOT_PIPE		/* Of sorts */
+#endif
+
+#ifdef DECNET
+typedef struct sockaddr_dn SockA;  /* See netdnet/dn.h or custom vms.h */
+#else /* Internet */
+typedef struct sockaddr_in SockA;  /* See netinet/in.h */
+#endif
+</PRE>
+
+<A NAME="z1"><H1>Platform Specific Stuff</H1></A>
+Information below this line is general for most platforms. <P>
+
+See also <A NAME="z6" HREF="#z2">General Stuff</A>
+
+<H2>Macintosh - Think-C</H2>
+
+Think-C is one development environment on the Mac.<P>
+
+We recommend that you compile with 4-byte ints to be compatible with
+MPW C. We used Tom Milligan's s_socket library which was written for 4 byte
+int, and the MacTCP library assumes 4-byte int.
+
+<PRE>
+#ifdef THINK_C
+#undef GOT_SYSTEM
+#define DEBUG			/* Can't put it on the CC command line	*/
+#define NO_UNIX_IO		/* getuid() missing			*/
+#define NO_GETPID		/* getpid() does not exist 		*/
+#define NO_GETWD		/* getwd() does not exist 		*/
+
+#undef NETCLOSE		    /* Routine to close a TCP-IP socket		*/
+#undef NETREAD		    /* Routine to read from a TCP-IP socket	*/
+#undef NETWRITE 	    /* Routine to write to a TCP-IP socket	*/
+#define NETCLOSE s_close    /* Routine to close a TCP-IP socket		*/
+#define NETREAD  s_read	    /* Routine to read from a TCP-IP socket	*/
+#define NETWRITE s_write    /* Routine to write to a TCP-IP socket	*/
+
+#define bind s_bind	    /* Funny names presumably to prevent clashes */
+#define connect s_connect
+#define accept s_accept
+#define listen s_listen
+#define socket s_socket
+#define getsockname s_getsockname
+
+/* The function prototype checking is better than the include files */
+
+extern s_close(int s);
+extern s_read(int s, char *buffer, int buflen);
+extern s_write(int s, const char *buffer, int buflen);
+
+extern bind(int s, struct sockaddr *name, int namelen);
+extern accept(int s, struct sockaddr *addr, int *addrlen);
+extern listen(int s, int qlen);
+extern connect(int s, struct sockaddr *addr, int addrlen);
+
+extern s_socket(int domain, int type, int protocol);
+extern s_getsockname(int s, struct sockaddr *name, int *namelen);
+extern struct hostent *gethostent(const char * name);
+extern unsigned long inet_addr(const char * name);
+#endif /* THINK_C */
+</PRE>
+
+<H2>Macintosh - MPW</H2>
+
+MPW is one development environment on the Mac.<P>
+
+This entry was created by Aleksandar Totic (atotic@ncsa.uiuc.edu) this
+file is compatible with sockets package released by NCSA.  One major conflict
+is that this library redefines write/read/etc as macros.  In some of HTML code
+these macros get executed when they should not be. Such files should
+define NO_SOCKET_DEFS on top. This is a temporary hack.
+
+<PRE>
+#ifdef applec			/* MPW  */
+#undef GOT_SYSTEM
+#define DEBUG			/* Can't put it on the CC command line */
+#define NO_UNIX_IO		/* getuid() missing */
+#define NO_GETPID		/* getpid() does not exist */
+#define NO_GETWD		/* getwd() does not exist */
+
+#undef NETCLOSE		    /* Routine to close a TCP-IP socket */
+#undef NETREAD		    /* Routine to read from a TCP-IP socket */
+#undef NETWRITE 	    /* Routine to write to a TCP-IP socket */
+#define NETCLOSE s_close    /* Routine to close a TCP-IP socket */
+#define NETREAD  s_read	    /* Routine to read from a TCP-IP socket */
+#define NETWRITE s_write    /* Routine to write to a TCP-IP socket */
+#define _ANSI_SOURCE
+#define GUI
+#define LINEFEED 10
+#define ANON_FTP_HOSTNAME
+#ifndef NO_SOCKET_DEFS
+#include &lt;MacSockDefs.h&gt;
+#endif /* NO_SOCKET_DEFS */
+
+#include &lt;socket.ext.h&gt;
+#include &lt;string.h&gt;
+
+#endif /* MPW */
+
+#ifndef STDIO_H
+#include &lt;stdio.h&gt;
+#define STDIO_H
+#endif
+</PRE>
+
+<H2>Big Blue - the world of incompatibility</H2>
+
+IBM RS600</H2>On the IBM RS-6000, AIX is almost Unix. <P>
+
+<PRE>
+#ifdef _AIX
+#define AIX
+#endif
+#ifdef AIX
+#define unix
+#endif
+
+/*    AIX 3.2
+**    -------
+*/
+
+#ifdef _IBMR2
+#define USE_DIRENT		/* sys V style directory open */
+#endif
+</PRE>
+
+<H2>IBM VM-CMS, VM-XA Mainframes</H2>
+
+MVS is compiled as for VM. MVS has no unix-style I/O.  The command line
+compile options seem to come across in lower case.
+
+<PRE>
+#ifdef mvs
+#define MVS
+#endif
+
+#ifdef MVS
+#define VM
+#endif
+
+#ifdef NEWLIB
+#pragma linkage(newlib,OS)	/* Enables recursive NEWLIB */
+#endif
+
+/*	VM doesn't have a built-in predefined token, so we cheat: */
+#ifndef VM
+#include &lt;string.h&gt;		/* For bzero etc - not  VM */
+#endif
+
+/*	Note:	All include file names must have 8 chars max (+".h")
+**
+**	Under VM, compile with "(DEF=VM,SHORT_NAMES,DEBUG)"
+**
+**	Under MVS, compile with "NOMAR DEF(MVS)" to get rid of 72 char margin
+**	  System include files TCPIP and COMMMAC neeed line number removal(!)
+*/
+
+#ifdef VM			/* or MVS -- see above. */
+#define NOT_ASCII		/* char type is not ASCII */
+#define NO_UNIX_IO		/* Unix I/O routines are not supported */
+#define NO_GETPID		/* getpid() does not exist */
+#define NO_GETWD		/* getwd() does not exist */
+#ifndef SHORT_NAMES
+#define SHORT_NAMES		/* 8 character uniqueness for globals */
+#endif
+#include &lt;manifest.h&gt;
+#include &lt;bsdtypes.h&gt;
+#include &lt;stdefs.h&gt;
+#include &lt;socket.h&gt;
+#include &lt;in.h&gt;
+#include &lt;inet.h&gt;
+#include &lt;netdb.h&gt;
+#include &lt;errno.h&gt;	    /* independent */
+extern char asciitoebcdic[], ebcdictoascii[];
+#define TOASCII(c)   (c=='\n' ?  10  : ebcdictoascii[c])
+#define FROMASCII(c) (c== 10  ? '\n' : asciitoebcdic[c])
+#include &lt;bsdtime.h&gt;
+#include &lt;time.h&gt;
+#include &lt;string.h&gt;
+#define INCLUDES_DONE
+#define TCP_INCLUDES_DONE
+#endif
+</PRE>
+
+<H2>IBM-PC running MS-DOS with SunNFS for TCP/IP</H2>
+This code thanks to Eelco van Asperen &lt;evas@cs.few.eur.nl&gt;
+
+<PRE>
+#ifdef PCNFS
+#include &lt;sys/types.h&gt;
+#include &lt;string.h&gt;
+#include &lt;errno.h&gt;	    /* independent */
+#include &lt;sys/time.h&gt;	    /* independent */
+#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;	    /* In place of sys/param and sys/file */
+#define INCLUDES_DONE
+#define FD_SET(fd,pmask) (*(unsigned*)(pmask)) |=  (1&lt;&lt;(fd))
+#define FD_CLR(fd,pmask) (*(unsigned*)(pmask)) &amp;= ~(1&lt;&lt;(fd))
+#define FD_ZERO(pmask)   (*(unsigned*)(pmask))=0
+#define FD_ISSET(fd,pmask) (*(unsigned*)(pmask) &amp; (1&lt;&lt;(fd)))
+#define NO_GROUPS
+#endif  /* PCNFS */
+</PRE>
+
+<H2>IBM-PC running Windows NT</H2>
+These parameters providede by  Susan C. Weber &lt;sweber@kyle.eitech.com&gt;.
+
+<PRE>
+#ifdef _WINDOWS
+#include "fcntl.h"			/* For HTFile.c */
+#include "sys\types.h"			/* For HTFile.c */
+#include "sys\stat.h"			/* For HTFile.c */
+
+#undef NETREAD
+#undef NETWRITE
+#undef NETCLOSE
+#define NETREAD(s,b,l)	((s)&gt;10 ? recv((s),(b),(l),0) : read((s),(b),(l)))
+#define NETWRITE(s,b,l)	((s)&gt;10 ? send((s),(b),(l),0) : write((s),(b),(l)))
+#define NETCLOSE(s) 	((s)&gt;10 ? closesocket(s) : close(s))
+#include &lt;io.h&gt;
+#include &lt;string.h&gt;
+#include &lt;process.h&gt;
+#include &lt;time.h&gt;
+#include &lt;direct.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;winsock.h&gt;
+typedef struct sockaddr_in SockA;  /* See netinet/in.h */
+#define INCLUDES_DONE
+#define TCP_INCLUDES_DONE
+#endif  /* WINDOWS */
+</PRE>
+
+<H2>VAX/VMS</H2>
+Under VMS, there are many versions of TCP-IP. Define one if you do not
+use Digital's UCX product:
+<DL>
+<DT>UCX
+<DD> DEC's "Ultrix connection" (default)
+<DT>WIN_TCP
+<DD> From Wollongong, now GEC
+software.
+<DT>MULTINET
+<DD> From SRI, now from TGV Inv.
+<DT>DECNET
+<DD> Cern's TCP socket emulation
+over DECnet
+</DL>
+The last three do not interfere with
+the unix i/o library, and so they
+need special calls to read, write
+and close sockets. In these cases
+the socket number is a VMS channel
+number, so we make the @@@ HORRIBLE
+@@@ assumption that a channel number
+will be greater than 10 but a unix
+file descriptor less than 10.  It
+works.
+
+<PRE>
+#ifdef VMS 
+#define CACHE_FILE_PREFIX  "SYS$LOGIN:Z_"
+
+#ifdef WIN_TCP
+#undef NETREAD
+#undef NETWRITE
+#undef NETCLOSE
+#define NETREAD(s,b,l)	((s)&gt;10 ? netread((s),(b),(l)) : read((s),(b),(l)))
+#define NETWRITE(s,b,l)	((s)&gt;10 ? netwrite((s),(b),(l)) : write((s),(b),(l)))
+#define NETCLOSE(s) 	((s)&gt;10 ? netclose(s) : close(s))
+#endif /* WIN_TCP */
+
+#ifdef MULTINET
+#undef NETCLOSE
+#undef NETREAD
+#undef NETWRITE
+#define NETREAD(s,b,l)	((s)&gt;10 ? socket_read((s),(b),(l)) : read((s),(b),(l)))
+#define NETWRITE(s,b,l)	((s)&gt;10 ? socket_write((s),(b),(l)) : \
+				write((s),(b),(l)))
+#define NETCLOSE(s) 	((s)&gt;10 ? socket_close(s) : close(s))
+#endif /* MULTINET */
+
+#ifdef DECNET
+#undef SELECT  /* not supported */
+#undef NETREAD
+#undef NETWRITE
+#undef NETCLOSE
+#define NETREAD(s,b,l)	((s)&gt;10 ? recv((s),(b),(l),0) : read((s),(b),(l)))
+#define NETWRITE(s,b,l)	((s)&gt;10 ? send((s),(b),(l),0) : write((s),(b),(l)))
+#define NETCLOSE(s) 	((s)&gt;10 ? socket_close(s) : close(s))
+#endif /* Decnet */
+         
+/*	Certainly this works for UCX and Multinet; not tried for Wollongong
+*/
+#ifdef MULTINET
+#include &lt;time.h&gt;
+#ifdef __TIME_T
+#define __TYPES
+#define __TYPES_LOADED
+#endif /* __TIME_T */
+#include "multinet_root:[multinet.include.sys]types.h"
+#include "multinet_root:[multinet.include]errno.h"
+#ifdef __TYPES
+#define __TIME_T
+#endif /* __TYPE */
+#ifdef __TIME_LOADED
+#define __TIME
+#endif /* __TIME_LOADED */
+#include "multinet_root:[multinet.include.sys]time.h"
+#else /* not MULTINET */
+#include &lt;types.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;time.h&gt;
+#endif /* not MULTINET */
+
+#include string
+
+#ifndef STDIO_H
+#include &lt;stdio&gt;
+#define STDIO_H
+#endif
+
+#include file
+
+#ifndef DECNET  /* Why is it used at all ? Types conflict with "types.h" */
+#include unixio
+#endif
+
+#define INCLUDES_DONE
+
+#ifdef MULTINET  /* Include from standard Multinet directories */
+#include "multinet_root:[multinet.include.sys]socket.h"
+#ifdef __TIME_LOADED  /* defined by sys$library:time.h */
+#define __TIME  /* to avoid double definitions in next file */
+#endif
+#include "multinet_root:[multinet.include.netinet]in.h"
+#include "multinet_root:[multinet.include.arpa]inet.h"
+#include "multinet_root:[multinet.include]netdb.h"
+#include "multinet_root:[multinet.include.sys]ioctl.h"
+
+#else  /* not multinet */
+#ifdef DECNET
+#include "types.h"  /* for socket.h */
+#include "socket.h"
+#include "dn"
+#include "dnetdb"
+/* #include "vms.h" */
+
+#else /* UCX or WIN */
+#ifdef CADDR_T
+#define __CADDR_T
+#endif /* problem with xlib.h inclusion */
+#include &lt;socket.h&gt;
+#include &lt;in.h&gt;
+#include &lt;inet.h&gt;
+#include &lt;netdb.h&gt;
+#include &lt;ucx$inetdef.h&gt;
+
+#endif  /* not DECNET */
+#endif  /* of Multinet or other TCP includes */
+
+#define TCP_INCLUDES_DONE
+</PRE>
+
+On VMS directory browsing is available through a separate
+copy of dirent.c. The definition of R_OK seem to be missing
+from the system include files...
+
+<PRE>
+#define USE_DIRENT
+#define GOT_READ_DIR 1
+#include "dirent.h"
+#define STRUCT_DIRENT struct dirent
+#define R_OK 4
+</PRE>
+
+On VMS machines, the linker needs
+to be told to put global data sections
+into a data segment using these storage
+classes. (MarkDonszelmann)
+
+<PRE>
+#ifdef VAXC
+#define GLOBALDEF globaldef
+#define GLOBALREF globalref
+#endif /*  VAXC */
+#endif	/* vms */
+</PRE>
+
+On non-VMS machines, the GLOBALDEF and GLOBALREF storage types default
+to normal C storage types.
+
+<PRE>
+#ifndef GLOBALREF
+#define GLOBALDEF
+#define GLOBALREF extern
+#endif
+</PRE>
+
+On non-VMS machines HTStat should be stat...On VMS machines
+HTStat is a function that converts directories and devices so that you
+can stat them.
+
+<PRE>
+#ifdef VMS
+#define HTLstat HTStat
+#else /* non VMS */
+#define HTStat stat
+#define HTLstat lstat
+#endif /* non VMS */
+</PRE>
+
+<H2>SCO ODT unix version</H2>
+
+(by Brian King)
+
+<PRE>
+#ifdef sco
+#include &lt;grp.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/fcntl.h&gt;
+#include &lt;time.h&gt;
+#define USE_DIRENT
+#define NEED_INITGROUPS
+#endif
+</PRE>
+
+<H2>MIPS unix</H2>
+Mips hack (bsd4.3/sysV mixture...)
+
+<PRE>
+#ifdef Mips	/* Bruker */
+extern int errno;
+typedef mode_t		int;
+#define S_ENFMT		S_ISGID		/* record locking enforcement flag */
+#define S_ISCHR(m)	(m & S_IFCHR)
+#define S_ISBLK(m)	(m & S_IFBLK)
+#define WEXITSTATUS(s)	(((s).w_status &gt;&gt; 8) & 0377)
+#define NO_STRFTIME
+</PRE>
+
+<H3>File Permissions</H3>
+
+<PRE>
+#ifndef S_IRWXU
+#define S_IRWXU 0000700
+#define S_IRWXG 0000070
+#define S_IRWXO 0000007
+#define S_IRUSR 0000400
+#define S_IWUSR 0000200
+#define S_IXUSR 0000100
+#define S_IRGRP 0000040
+#define S_IWGRP 0000020
+#define S_IXGRP 0000010
+#define S_IROTH 0000004
+#define S_IWOTH 0000002
+#define S_IXOTH 0000001
+#endif /* S_IRWXU */
+#endif /* Mips */
+</PRE>
+
+<H2>Solaris</H2>
+
+Includes Linux (thanks to Rainer Klute) and other SVR5 based systems
+
+<PRE>
+#if defined(__svr4__) || defined(_POSIX_SOURCE) || defined(__hpux)
+
+#ifdef UTS4				      /* UTS wants sys/types.h first */
+#include &lt;sys/types.h&gt;
+#endif
+
+#include &lt;unistd.h&gt;
+
+#ifdef UTS4
+#include &lt;sys/fcntl.h&gt;
+#define POSIXWAIT
+#endif
+
+#ifdef AIX						       /* Apple Unix */
+#include &lt;fcntl.h&gt;
+#else
+#include &lt;sys/fcntl.h&gt;
+#endif
+</PRE>
+
+This is for NCR 3000 and Pyramid that also are SVR4 systems. Thanks to
+<EM>Alex Podlecki, &lt;a.podlecki@att.com&gt;</EM>
+
+<PRE>
+#ifndef NGROUPS_MAX		
+#include &lt;limits.h&gt;
+#endif 
+
+#endif /* Solaris and SVR5 */
+</PRE>
+
+<H2>UTS 2.1 (BSD-like)</H2>
+<PRE>
+#ifdef UTS2
+#include &lt;time.h&gt;
+#include &lt;fcntl.h&gt;
+
+#define	NO_STRFTIME
+#define	WEXITSTATUS(x)	((int)((x).w_T.w_Retcode))
+
+#undef POSIXWAIT
+#endif /* UTS2 */
+</PRE>
+
+<H2>OSF/1</H2>
+<PRE>
+#ifdef __osf__
+#define USE_DIRENT
+#endif /* OSF1 AXP */
+</PRE>
+
+<H2>ISC 3.0</H2>
+by Lauren Weinstein &lt;lauren@vortex.com&gt;.
+<PRE>
+
+#ifdef ISC3			/* Lauren */
+#define USE_DIRENT
+#define GOT_READ_DIR 1
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/dirent.h&gt;
+#define direct dirent
+#include &lt;sys/unistd.h&gt;
+#define d_namlen d_reclen
+#include &lt;sys/limits.h&gt;
+
+#define SIGSTP
+#define POSIXWAIT
+#include &lt;sys/types.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;net/errno.h&gt;
+
+#define _SYSV3
+#include &lt;time.h&gt;
+
+#include &lt;sys/fcntl.h&gt;
+#define S_ISDIR(m)	(((m) & 0170000) == 0040000)
+#define S_ISCHR(m)	(((m) & 0170000) == 0020000)
+#define S_ISBLK(m)	(((m) & 0170000) == 0060000)
+#define S_ISREG(m)	(((m) & 0170000) == 0100000)
+#define S_ISFIFO(m)	(((m) & 0170000) == 0010000)
+#define S_ISLNK(m)	(((m) & 0170000) == 0120000)
+#endif	/* ISC 3.0 */
+</PRE>
+
+<H2>SOCKS</H2>
+SOCKS modifications by Ian Dunkin &lt;imd1707@ggr.co.uk&gt;.
+<PRE>
+#if defined(SOCKS) && !defined(RULE_FILE)
+#define connect Rconnect
+#define accept  Raccept
+#define getsockname Rgetsockname
+#define bind Rbind 
+#define listen Rlisten  
+#endif
+</PRE>
+
+<H2>NeXT</H2>
+<PRE>
+#ifdef NeXT
+#include "sys/types.h"
+#include "sys/stat.h"
+
+typedef unsigned short mode_t;
+
+#ifndef S_ISDIR
+#define S_ISDIR(m)     (m &amp; S_IFDIR)
+#define S_ISREG(m)     (m &amp; S_IFREG)
+#define S_ISCHR(m)     (m &amp; S_IFCHR)
+#define S_ISBLK(m)     (m &amp; S_IFBLK)
+#define S_ISLNK(m)     (m &amp; S_IFLNK)
+#define S_ISSOCK(m)    (m &amp; S_IFSOCK)
+#define S_ISFIFO(m)    (NO)
+#endif
+
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(s) (((s).w_status &gt;&gt; 8) &amp; 0377)
+#endif
+</PRE>
+
+<H3>File Permissions for NeXT</H3>
+<PRE>
+#ifndef S_IRWXU
+#define S_IRWXU 0000700
+#define S_IRWXG 0000070
+#define S_IRWXO 0000007
+#define S_IRUSR 0000400
+#define S_IWUSR 0000200
+#define S_IXUSR 0000100
+#define S_IRGRP 0000040
+#define S_IWGRP 0000020
+#define S_IXGRP 0000010
+#define S_IROTH 0000004
+#define S_IWOTH 0000002
+#define S_IXOTH 0000001
+#endif /* S_IRWXU */
+#endif /* NeXT */
+</PRE>
+
+<H2>A/UX Apple UNIX</H2>
+
+<ADDRESS>Kelly King, bhutab@apple.com and Jim Jagielski,
+jim@jagubox.gsfc.nasa.gov</ADDRESS>
+
+<PRE>
+#ifdef _AUX
+#include &lt;time.h&gt;
+#define WEXITSTATUS(s) (((s).w_status &gt;&gt; 8) &amp; 0377)
+#endif
+</PRE>
+
+<H2><A NAME="z10">Regular BSD unix versions</H2>
+
+These are a default unix where not already defined specifically.
+
+<PRE>
+#ifndef INCLUDES_DONE
+
+#include &lt;sys/types.h&gt;
+#include &lt;string.h&gt;
+
+#include &lt;errno.h&gt;	    /* independent */
+#include &lt;sys/time.h&gt;	    /* independent */
+#include &lt;sys/stat.h&gt;
+#include &lt;sys/param.h&gt;
+#include &lt;sys/file.h&gt;	    /* For open() etc */
+#define INCLUDES_DONE
+#endif	/* Normal includes */
+</PRE>
+
+<H3>Directory reading stuff - BSD or SYS V</H3>
+<PRE>
+#ifdef unix                    	  /* if this is to compile on a UNIX machine */
+#define GOT_READ_DIR 1       /* if directory reading functions are available */
+
+#ifndef NeXT
+#define USE_DIRENT		  /* Try this all the time, Henrik May 29 94 */
+#endif
+#ifdef USE_DIRENT             			 	    /* sys v version */
+#include &lt;dirent.h&gt;
+#define STRUCT_DIRENT struct dirent
+#else
+#include &lt;sys/dir.h&gt;
+#define STRUCT_DIRENT struct direct
+#endif
+
+#if defined(sun) &amp;&amp; defined(__svr4__)
+#include &lt;sys/fcntl.h&gt;
+#include &lt;limits.h&gt;
+#endif
+#ifndef FNDELAY
+#define FNDELAY		O_NDELAY
+#endif
+#endif
+</PRE>
+
+<H1><A NAME="z2">General Stuff</A></H1>
+
+Information below this line is general for most platforms. <P>
+
+See also <A NAME="z3" HREF="#z1">Platform Specific Stuff</A>
+
+<H3>Include files for TCP</H3>
+<PRE>
+#ifndef TCP_INCLUDES_DONE
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+
+/* #ifndef __hpux */ /* this may or may not be good -marc -- according
+			to somebody, it wasn't a good thing...(?) -- Ari */
+#include &lt;arpa/inet.h&gt;	    /* Must be after netinet/in.h */
+/* #endif */
+
+#include &lt;netdb.h&gt;
+#endif	/* TCP includes */
+</PRE>
+
+<H3>Rough estimate of max path length</H3>
+<PRE>
+#ifndef HT_MAX_PATH
+#ifdef MAXPATHLEN
+#define HT_MAX_PATH MAXPATHLEN
+#else
+#ifdef PATH_MAX
+#define HT_MAX_PATH PATH_MAX
+#else
+#define HT_MAX_PATH 1024	 	      	/* Any better ideas? */
+#endif
+#endif
+#endif /* HT_MAX_PATH */
+</PRE>
+
+
+<H3>Definition of NGROUPS</H3>
+<PRE>
+#ifdef NO_UNIX_IO
+#define NO_GROUPS
+#endif
+
+#ifndef NO_GROUPS
+#ifndef NGROUPS
+#ifdef NGROUPS_MAX
+#define NGROUPS NGROUPS_MAX
+#else
+#define NGROUPS 20				/* Any better ideas? */
+#endif
+#endif
+#endif
+</PRE>
+
+<H3>Definition of Max Domain Name Length</H3>
+<PRE>
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64			/* Any better ideas? */
+#endif
+</PRE>
+
+<H3>Macros for manipulating masks for select()</H3>
+<PRE>
+#ifdef SELECT
+#ifndef FD_SET
+typedef unsigned int fd_set;
+#define FD_SET(fd,pmask) (*(pmask)) |=  (1&lt;&lt;(fd))
+#define FD_CLR(fd,pmask) (*(pmask)) &amp;= ~(1&lt;&lt;(fd))
+#define FD_ZERO(pmask)   (*(pmask))=0
+#define FD_ISSET(fd,pmask) (*(pmask) &amp; (1&lt;&lt;(fd)))
+#endif  /* FD_SET */
+#endif  /* SELECT */
+</PRE>
+
+<H3>Macros for converting characters</H3>
+
+<PRE>
+#ifndef TOASCII
+#define TOASCII(c) (c)
+#define FROMASCII(c) (c)                                   
+#endif
+</PRE>
+
+<H3>White Characters</H3>
+
+Is character c white space? For speed, include all control characters
+
+<PRE>
+#define WHITE(c) (((unsigned char)(TOASCII(c))) &lt;= 32)
+</PRE>
+
+<H3>Cache file prefix</H3>
+
+This is something onto which we tag something meaningful to make a cache
+file name.  used in HTWSRC.c at least. If it is nor defined at all, caching
+is turned off.
+
+<PRE>
+#ifndef CACHE_FILE_PREFIX
+#ifdef unix
+#define CACHE_FILE_PREFIX  "/usr/wsrc/"
+#endif
+#endif
+</PRE>
+
+<PRE>
+#endif
+</PRE>
+End of system-specific file
+</BODY>
+</HTML>

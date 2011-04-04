@@ -1,0 +1,39 @@
+#       Platform-specific Makefile for W3 Library       (AXP OSF1)
+#       -----------------------------------------
+#
+
+WWW = ../..
+
+#  Where should temporary (object) files go?
+WTMP = ../..
+
+# Options for CC
+CC = cc
+CFLAGS = -g
+# CFLAGS = -g -non_shared
+LFLAGS =
+
+# Options for GCC
+# CC = gcc
+# CFLAGS = -Wall -g
+# CFLAGS = -Wall -g -static
+# LFLAGS =
+
+#ASIS_MACH = dec-station/ultrix-4.2
+#WWW_MACH = OSF1
+
+# Directory for installed binary:
+LIBDIR = /usr/local/lib
+
+#
+#	WHEN COMPILING WITH DIRECT WAIS SUPPORT:
+#
+#	Uncomment these six lines (and edit them, if necessary).
+#
+# WAIS = ../../../freeWAIS
+# WAISLIB =  $(WAIS)/bin/client.a $(WAIS)/bin/wais.a
+# MATHLIB = -lm
+# WAISINC = -I$(WAIS)/include
+# WAISCFLAGS = -DHT_DIRECT_WAIS
+# HTWAIS = $(WTMP)/Library/$(WWW_MACH)/HTWAIS.o
+

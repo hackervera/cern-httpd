@@ -1,0 +1,48 @@
+$ WRITE SYS$OUTPUT "Creating WWW Server for "UCX" on "ALPHA"." 
+$ WRITE SYS$OUTPUT "=================================================" 
+$ IF "''F$SEARCH("[--.ALPHA.UCX]*.*")'" .EQS. "" 	   THEN CREATE/DIR [--.ALPHA.UCX]
+$ IF "''F$SEARCH("[--.ETC]*.*")'" .EQS. "" 	   THEN CREATE/DIR [--.ETC]
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTDAEMON.obj [-]HTDaemon.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTREQUEST.obj [-]HTRequest.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTRETRIEVE.obj [-]HTRetrieve.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTSCRIPT.obj [-]HTScript.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTLOAD.obj [-]HTLoad.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTCACHE.obj [-]HTCache.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTCACHEINFO.obj [-]HTCacheInfo.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTCONFIG.obj [-]HTConfig.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTWILD.obj [-]HTWild.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTSINIT.obj [-]HTSInit.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTSUTILS.obj [-]HTSUtils.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTIMS.obj [-]HTims.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTPASSWD.obj [-]HTPasswd.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTAUTH.obj [-]HTAuth.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTLEX.obj [-]HTLex.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTGROUP.obj [-]HTGroup.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTACL.obj [-]HTACL.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTAAPROT.obj [-]HTAAProt.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTAASERV.obj [-]HTAAServ.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTAAFILE.obj [-]HTAAFile.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTLOG.obj [-]HTLog.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTGC.obj [-]HTgc.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTUSERINIT.obj [-]HTUserInit.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTRFC931.obj [-]HTRFC931.c
+$ link /exe=[--.ALPHA.UCX]httpd.exe [--.ALPHA.UCX]HTDaemon.obj, [--.ALPHA.UCX]HTRequest.obj, [--.ALPHA.UCX]HTRetrieve.obj, [--.ALPHA.UCX]HTScript.obj, [--.ALPHA.UCX]HTLoad.obj, 		[--.ALPHA.UCX]HTCache.obj, [--.ALPHA.UCX]HTCacheInfo.obj, [--.ALPHA.UCX]H-
+TConfig.obj, [--.ALPHA.UCX]HTWild.obj, 		[--.ALPHA.UCX]HTSInit.obj, [--.ALPHA.UCX]HTSUtils.obj, [--.ALPHA.UCX]HTims.obj, 		[--.ALPHA.UCX]HTPasswd.obj, [--.ALPHA.UCX]HTAuth.obj, [--.ALPHA.UCX]HTLex.obj, [--.ALPHA.UCX]HTGroup.obj, [--.ALPHA.UCX]HTACL.obj-
+, [--.ALPHA.UCX]HTAAProt.obj, 		[--.ALPHA.UCX]HTAAServ.obj, [--.ALPHA.UCX]HTAAFile.obj, [--.ALPHA.UCX]HTLog.obj, [--.ALPHA.UCX]HTgc.obj, [--.ALPHA.UCX]HTUserInit.obj, [--.ALPHA.UCX]HTRFC931.obj, [---.LIBRARY.ALPHA.UCX]wwwlib/lib, [---.LIBRARY.ALPHA.UCX-
+]wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTADM.obj [-]HTAdm.c
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTEXTDUMMY.obj []HTextDummy.c
+$ link /exe=[--.ALPHA.UCX]htadm.exe [--.ALPHA.UCX]HTAdm.obj, [--.ALPHA.UCX]HTPasswd.obj, [--.ALPHA.UCX]HTAAFile.obj,                 [--.ALPHA.UCX]HTextDummy.obj, [---.LIBRARY.ALPHA.UCX]wwwlib/lib, wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]HTIMAGE.obj [-]HTImage.c
+$ link /exe=[--.ALPHA.UCX]htimage.exe [--.ALPHA.UCX]HTImage.obj,                 [--.ALPHA.UCX]HTextDummy.obj, [---.LIBRARY.ALPHA.UCX]wwwlib/lib, [---.LIBRARY.ALPHA.UCX]wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]CGIPARSE.obj [-]CGIParse.c
+$ link /exe=[--.ALPHA.UCX]cgiparse.exe [--.ALPHA.UCX]CGIParse.obj,                 [--.ALPHA.UCX]HTextDummy.obj, [---.LIBRARY.ALPHA.UCX]wwwlib/lib, [---.LIBRARY.ALPHA.UCX]wwwlib.opt/opt
+$ continue
+$ cc /DEFINE=(VMS,DEBUG,RULES,ACCESS_AUTH,VD="""3.0pre6vms2""",UCX)/INC=([-],[],[---.Library.Implementation],[---.Library.Implementation.vms])/Standard=VAXC/Prefix=ALL/obj=[--.ALPHA.UCX]CGIUTILS.obj [-]cgiutils.c
+$ link /exe=[--.ALPHA.UCX]cgiutils.exe [--.ALPHA.UCX]cgiutils.obj, [--.ALPHA.UCX]HTSUtils.obj,                 [--.ALPHA.UCX]HTextDummy.obj, [---.LIBRARY.ALPHA.UCX]wwwlib/lib, [---.LIBRARY.ALPHA.UCX]wwwlib.opt/opt
+$ continue
+$ copy []setup.com [--.ALPHA.UCX]setup.com
+$ continue

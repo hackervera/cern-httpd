@@ -1,0 +1,88 @@
+*** HTWriter.c  Fri Jul  5 11:01:42 EDT 1996
+--- HTWriter.c.ORIG     Fri Jul  5 10:56:44 EDT 1996
+***************
+*** 8,15 ****
+  
+  #include "HTUtils.h"
+  #include "tcp.h"
+- #include <errno.h> /* for extern int errno */
+- #include <strings.h> /* for strerror() */
+  
+  /*            HTML Object
+  **            -----------
+--- 8,13 ----
+***************
+*** 46,52 ****
+  #endif
+      while (read_pointer < write_pointer) {
+          int status;
+-      errno = 0;
+  #ifdef OLD_CODE
+        status = NETWRITE(me->soc, me->buffer,  /* Put timeout? @@@ */
+                        write_pointer - read_pointer);
+--- 44,49 ----
+***************
+*** 53,68 ****
+  #endif /* OLD_CODE */
+        status = NETWRITE(me->soc, read_pointer, write_pointer - read_pointer);
+        if (status<0) {
+!           if (EINTR == errno) {
+!               status = 0;             /* assume the write was interrupted, 
+!                                          and no bytes were written */
+!           }
+!           else {
+!               if(TRACE) fprintf(stderr,
+!               "HTWrite: Error: write() on socket returns %d (errno %d -- ``%s''!!!\n",
+!                                 status, errno, strerror(errno));
+!               return;
+!           }
+        }
+        read_pointer += status;
+      }
+--- 50,58 ----
+  #endif /* OLD_CODE */
+        status = NETWRITE(me->soc, read_pointer, write_pointer - read_pointer);
+        if (status<0) {
+!           if(TRACE) fprintf(stderr,
+!           "HTWrite: Error: write() on socket returns %d !!!\n", status);
+!           return;
+        }
+        read_pointer += status;
+      }
+***************
+*** 120,141 ****
+      }
+  #endif
+      while (read_pointer < write_pointer) {
+!         int status;
+! 
+!       errno = 0;
+!       status = NETWRITE(me->soc, read_pointer,
+!                         write_pointer - read_pointer);
+        if (status<0) {
+!           if (EINTR == errno) {
+!               status = 0;             /* assume the write was interrupted, 
+!                                          and no bytes were written */
+!           }
+!           else {
+!               if(TRACE) fprintf(stderr,
+!               "HTWriter_write: Error on socket output stream!!! (errno %d -- ``%s''\n",
+!                                 errno, strerror(errno));
+!               return;
+!           }
+        }
+        read_pointer = read_pointer + status;
+      }
+--- 110,121 ----
+      }
+  #endif
+      while (read_pointer < write_pointer) {
+!         int status = NETWRITE(me->soc, read_pointer,
+!                       write_pointer - read_pointer);
+        if (status<0) {
+!           if(TRACE) fprintf(stderr,
+!           "HTWriter_write: Error on socket output stream!!!\n");
+!           return;
+        }
+        read_pointer = read_pointer + status;
+      }
